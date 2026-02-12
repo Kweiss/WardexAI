@@ -13,6 +13,24 @@
     "test": "vitest run",
     "test:watch": "vitest"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Kweiss/Wardex.git",
+    "directory": "packages/mcp-server"
+  },
+  "homepage": "https://github.com/Kweiss/Wardex#readme",
+  "bugs": {
+    "url": "https://github.com/Kweiss/Wardex/issues"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "claude",
+    "ai-agent",
+    "ethereum",
+    "wallet-security",
+    "wardex"
+  ],
   "dependencies": {
     "@wardex/core": "^0.1.0",
     "@wardex/signer": "^0.1.0",

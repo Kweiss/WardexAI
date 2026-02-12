@@ -171,10 +171,23 @@ contract WardexValidationModule is IWardexValidationModule {
             return 1; // Invalid
         }
 
-        // 3. Check spending limits for ETH transfers
-        // Extract value from callData if it's a direct call
-        // (For full implementation, this would decode the callData to extract value)
-        // For now, we track based on the raw UserOp
+        // 3. M-10 FIX: Check and record spending limits for ETH transfers.
+        //    Extract value from callData using the standard execute(address,uint256,bytes)
+        //    pattern (selector 0xb61d27f6) used by most ERC-4337 smart accounts
+        //    (Safe, Kernel, Biconomy). If callData doesn't match this pattern,
+        //    the spending check is skipped (defense-in-depth: the off-chain SDK
+        //    still enforces limits).
+        uint256 extractedValue = _extractExecuteValue(userOp.callData);
+        if (extractedValue > 0) {
+            if (!checkSpendingLimit(userOp.sender, address(0), extractedValue)) {
+                emit TransactionBlocked(userOp.sender, userOpHash, "Spending limit exceeded");
+                return 1; // Invalid
+            }
+            // Record spending optimistically (before execution).
+            // If the UserOp reverts during execution, the spending counter is
+            // over-counted. This is a conservative trade-off (fail-safe, not fail-open).
+            _recordSpending(userOp.sender, address(0), extractedValue);
+        }
 
         emit TransactionApproved(userOp.sender, userOpHash);
         return 0; // Valid
@@ -328,6 +341,30 @@ contract WardexValidationModule is IWardexValidationModule {
 
         address recovered = ecrecover(prefixedHash, v, r, s);
         return recovered == evaluator && recovered != address(0);
+    }
+
+    /**
+     * @notice Extracts the ETH value from a standard execute(address,uint256,bytes) callData.
+     * @dev The execute function selector is 0xb61d27f6. The value is the second
+     *      parameter (bytes 36-68 of the callData). If the callData doesn't match
+     *      this pattern, returns 0 (no value extracted, spending check skipped).
+     *      This covers the standard ERC-4337 smart account execute pattern used by
+     *      Safe, Kernel, Biconomy, and similar implementations.
+     */
+    function _extractExecuteValue(bytes calldata callData) internal pure returns (uint256) {
+        // Minimum length: 4 (selector) + 32 (address) + 32 (value) = 68 bytes
+        if (callData.length < 68) return 0;
+
+        // Check for execute(address,uint256,bytes) selector: 0xb61d27f6
+        bytes4 selector = bytes4(callData[:4]);
+        if (selector != bytes4(0xb61d27f6)) return 0;
+
+        // Value is at offset 36 (4 + 32 bytes for the address parameter)
+        uint256 value;
+        assembly {
+            value := calldataload(add(callData.offset, 36))
+        }
+        return value;
     }
 
     // -----------------------------------------------------------------------

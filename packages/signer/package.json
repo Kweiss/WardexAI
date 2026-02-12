@@ -10,6 +10,26 @@
     "test": "vitest run",
     "test:watch": "vitest"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Kweiss/Wardex.git",
+    "directory": "packages/signer"
+  },
+  "homepage": "https://github.com/Kweiss/Wardex#readme",
+  "bugs": {
+    "url": "https://github.com/Kweiss/Wardex/issues"
+  },
+  "keywords": [
+    "ethereum",
+    "signer",
+    "key-isolation",
+    "session-keys",
+    "delegation",
+    "erc-7715",
+    "metamask",
+    "ai-agent",
+    "wardex"
+  ],
   "dependencies": {
     "ethers": "^6.13.0"
   },

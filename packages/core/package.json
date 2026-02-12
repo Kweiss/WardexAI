@@ -10,6 +10,26 @@
     "test": "vitest run",
     "test:watch": "vitest"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Kweiss/Wardex.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://github.com/Kweiss/Wardex#readme",
+  "bugs": {
+    "url": "https://github.com/Kweiss/Wardex/issues"
+  },
+  "keywords": [
+    "ethereum",
+    "security",
+    "ai-agent",
+    "wallet",
+    "prompt-injection",
+    "middleware",
+    "web3",
+    "erc-4337",
+    "wardex"
+  ],
   "dependencies": {
     "ethers": "^6.13.0",
     "viem": "^2.21.0"

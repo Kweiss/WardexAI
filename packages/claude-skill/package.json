@@ -12,6 +12,24 @@
     "hooks",
     "settings-template.json"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Kweiss/Wardex.git",
+    "directory": "packages/claude-skill"
+  },
+  "homepage": "https://github.com/Kweiss/Wardex#readme",
+  "bugs": {
+    "url": "https://github.com/Kweiss/Wardex/issues"
+  },
+  "keywords": [
+    "claude-code",
+    "skill",
+    "ai-agent",
+    "ethereum",
+    "wallet-security",
+    "hooks",
+    "wardex"
+  ],
   "dependencies": {
     "@wardex/core": "^0.1.0"
   },

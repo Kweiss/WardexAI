@@ -10,6 +10,25 @@
     "test": "vitest run",
     "test:watch": "vitest"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Kweiss/Wardex.git",
+    "directory": "packages/intelligence"
+  },
+  "homepage": "https://github.com/Kweiss/Wardex#readme",
+  "bugs": {
+    "url": "https://github.com/Kweiss/Wardex/issues"
+  },
+  "keywords": [
+    "ethereum",
+    "threat-intelligence",
+    "contract-analysis",
+    "address-reputation",
+    "denylist",
+    "bytecode",
+    "ai-agent",
+    "wardex"
+  ],
   "dependencies": {
     "ethers": "^6.13.0"
   },

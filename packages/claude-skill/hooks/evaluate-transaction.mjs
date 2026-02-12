@@ -114,8 +114,18 @@ async function main() {
   try {
     const raw = await readStdin();
     input = JSON.parse(raw);
-  } catch {
-    // If we can't parse stdin, allow the tool call (don't block on hook errors)
+  } catch (err) {
+    // M-06 FIX: Default to 'ask' instead of silent allow on parse errors.
+    // A broken hook should prompt the user, not silently approve transactions.
+    process.stderr.write(`[Wardex] Hook input parse error: ${err?.message ?? 'unknown'}\n`);
+    const output = {
+      hookSpecificOutput: {
+        hookEventName: 'PreToolUse',
+        permissionDecision: 'ask',
+        permissionDecisionReason: '[Wardex] Security hook could not parse input. Manual review required before proceeding.',
+      },
+    };
+    process.stdout.write(JSON.stringify(output));
     process.exit(0);
   }
 

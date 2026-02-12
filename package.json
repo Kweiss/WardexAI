@@ -1,6 +1,7 @@
 {
   "name": "wardex",
   "private": true,
+  "description": "Adaptive security SDK for AI agent wallets on Ethereum",
   "workspaces": [
     "packages/*"
   ],
@@ -10,6 +11,15 @@
     "lint": "eslint packages/*/src/**/*.ts",
     "clean": "rm -rf packages/*/dist"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Kweiss/Wardex.git"
+  },
+  "homepage": "https://github.com/Kweiss/Wardex#readme",
+  "bugs": {
+    "url": "https://github.com/Kweiss/Wardex/issues"
+  },
+  "license": "MIT",
   "devDependencies": {
     "@types/node": "^22.0.0",
     "typescript": "^5.7.0",
