@@ -26,11 +26,11 @@ AI agents are getting wallets. When an LLM can sign transactions, every prompt i
 ## Quick Start
 
 ```bash
-npm install @wardex/core
+npm install @wardexai/core
 ```
 
 ```typescript
-import { createWardex, defaultPolicy } from '@wardex/core';
+import { createWardex, defaultPolicy } from '@wardexai/core';
 
 const wardex = createWardex({
   policy: defaultPolicy(),
@@ -128,12 +128,12 @@ Wardex adapts its enforcement based on value at risk:
 
 | Package | Description |
 |---|---|
-| [`@wardex/core`](./packages/core/) | Evaluation engine, 9-stage middleware pipeline, policy, risk scoring, output filter, ethers.js + viem provider wrappers |
-| [`@wardex/signer`](./packages/signer/) | Isolated signer process (HMAC-SHA256, AES-256-GCM), ERC-7715 session keys, MetaMask Delegation Framework integration |
-| [`@wardex/intelligence`](./packages/intelligence/) | On-chain contract analysis, address reputation, EVM bytecode scanning, denylist management |
-| [`@wardex/mcp-server`](./packages/mcp-server/) | MCP server with stdio + HTTP dual transport (4 tools) for Claude Code and agent frameworks |
-| [`@wardex/claude-skill`](./packages/claude-skill/) | Claude Code skill with PreToolUse hooks and slash commands for automatic transaction interception |
-| [`@wardex/contracts`](./packages/contracts/) | WardexValidationModule.sol — ERC-4337 validation module with on-chain spending limits, freeze, and evaluator management |
+| [`@wardexai/core`](./packages/core/) | Evaluation engine, 9-stage middleware pipeline, policy, risk scoring, output filter, ethers.js + viem provider wrappers |
+| [`@wardexai/signer`](./packages/signer/) | Isolated signer process (HMAC-SHA256, AES-256-GCM), ERC-7715 session keys, MetaMask Delegation Framework integration |
+| [`@wardexai/intelligence`](./packages/intelligence/) | On-chain contract analysis, address reputation, EVM bytecode scanning, denylist management |
+| [`@wardexai/mcp-server`](./packages/mcp-server/) | MCP server with stdio + HTTP dual transport (4 tools) for Claude Code and agent frameworks |
+| [`@wardexai/claude-skill`](./packages/claude-skill/) | Claude Code skill with PreToolUse hooks and slash commands for automatic transaction interception |
+| [`@wardexai/contracts`](./packages/contracts/) | WardexValidationModule.sol — ERC-4337 validation module with on-chain spending limits, freeze, and evaluator management |
 
 ---
 
@@ -144,7 +144,7 @@ Wardex adapts its enforcement based on value at risk:
 Wrap your existing ethers.js signer or viem wallet client. Every `sendTransaction` call gets evaluated automatically:
 
 ```typescript
-import { wrapEthersSigner } from '@wardex/core';
+import { wrapEthersSigner } from '@wardexai/core';
 
 const protectedSigner = wrapEthersSigner(originalSigner, wardex);
 // Use protectedSigner exactly like your original signer
@@ -152,7 +152,7 @@ const protectedSigner = wrapEthersSigner(originalSigner, wardex);
 ```
 
 ```typescript
-import { wrapViemWalletClient } from '@wardex/core';
+import { wrapViemWalletClient } from '@wardexai/core';
 
 const protectedClient = wrapViemWalletClient(walletClient, wardex);
 ```
@@ -162,7 +162,7 @@ const protectedClient = wrapViemWalletClient(walletClient, wardex);
 For Claude Code or any MCP-compatible agent:
 
 ```bash
-npx @wardex/mcp-server --stdio
+npx @wardexai/mcp-server --stdio
 ```
 
 Exposes 4 tools: `wardex_evaluate_transaction`, `wardex_check_address`, `wardex_get_status`, `wardex_filter_output`.
@@ -172,7 +172,7 @@ Exposes 4 tools: `wardex_evaluate_transaction`, `wardex_check_address`, `wardex_
 Auto-intercepts `mcp__send_transaction` and `mcp__sign_transaction` calls:
 
 ```bash
-claude skill install @wardex/claude-skill
+claude skill install @wardexai/claude-skill
 ```
 
 ### Session Keys (ERC-7715)
@@ -180,7 +180,7 @@ claude skill install @wardex/claude-skill
 Scope agent authority with time-bounded, value-limited session keys:
 
 ```typescript
-import { SessionManager } from '@wardex/signer';
+import { SessionManager } from '@wardexai/signer';
 
 const manager = new SessionManager();
 const session = manager.createSession({
@@ -197,7 +197,7 @@ const session = manager.createSession({
 On-chain enforcement with EIP-712 signed delegations and caveat enforcers:
 
 ```typescript
-import { DelegationManager } from '@wardex/signer';
+import { DelegationManager } from '@wardexai/signer';
 
 const dm = new DelegationManager({ chainId: 1 });
 const delegation = dm.createDelegation(sessionConfig, delegatorAddress);
@@ -296,13 +296,13 @@ Full documentation lives in [`docs/`](./docs/):
 ```
 wardex/
   packages/
-    core/           @wardex/core        — Evaluation engine, middleware pipeline, providers
-    signer/         @wardex/signer      — Isolated signer, session keys, delegation manager
-    intelligence/   @wardex/intelligence — On-chain analysis, reputation, bytecode scanning
-    mcp-server/     @wardex/mcp-server  — MCP server (stdio + HTTP)
-    claude-skill/   @wardex/claude-skill — Claude Code skill + PreToolUse hooks
-    contracts/      @wardex/contracts   — Solidity: WardexValidationModule (ERC-4337)
-    test/           @wardex/test        — 168 tests across 12 suites
+    core/           @wardexai/core        — Evaluation engine, middleware pipeline, providers
+    signer/         @wardexai/signer      — Isolated signer, session keys, delegation manager
+    intelligence/   @wardexai/intelligence — On-chain analysis, reputation, bytecode scanning
+    mcp-server/     @wardexai/mcp-server  — MCP server (stdio + HTTP)
+    claude-skill/   @wardexai/claude-skill — Claude Code skill + PreToolUse hooks
+    contracts/      @wardexai/contracts   — Solidity: WardexValidationModule (ERC-4337)
+    test/           @wardexai/test        — 168 tests across 12 suites
   docs/                                 — 25 documentation files
   examples/                             — Working code examples
 ```

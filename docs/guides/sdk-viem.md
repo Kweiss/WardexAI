@@ -12,20 +12,20 @@ Add Wardex security to a viem wallet client in 5 minutes. Every `sendTransaction
 |---|---|
 | Node.js | 20+ |
 | viem | 2.x |
-| `@wardex/core` | latest |
+| `@wardexai/core` | latest |
 
 ---
 
 ## Step 1: Install Packages
 
 ```bash
-npm install @wardex/core viem
+npm install @wardexai/core viem
 ```
 
 If you want on-chain intelligence (address reputation, contract bytecode analysis), also install the intelligence package:
 
 ```bash
-npm install @wardex/intelligence
+npm install @wardexai/intelligence
 ```
 
 ---
@@ -34,7 +34,7 @@ npm install @wardex/intelligence
 
 ```typescript
 // wardex-setup.ts
-import { createWardex, defaultPolicy } from '@wardex/core';
+import { createWardex, defaultPolicy } from '@wardexai/core';
 
 const wardex = createWardex({
   policy: defaultPolicy(),
@@ -66,7 +66,7 @@ const wardex = createWardex({
 import { createWalletClient, http } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { mainnet } from 'viem/chains';
-import { wrapViemWalletClient } from '@wardex/core';
+import { wrapViemWalletClient } from '@wardexai/core';
 
 const account = privateKeyToAccount(process.env.PRIVATE_KEY as `0x${string}`);
 
@@ -121,7 +121,7 @@ If the verdict is `approve` or `advise`, the transaction proceeds. If the verdic
 ```typescript
 // agent.ts
 import { parseEther } from 'viem';
-import { wrapViemWalletClient, WardexBlockedError } from '@wardex/core';
+import { wrapViemWalletClient, WardexBlockedError } from '@wardexai/core';
 
 const protectedClient = wrapViemWalletClient(walletClient, wardex);
 
@@ -221,7 +221,7 @@ Add on-chain intelligence for address reputation lookups and contract bytecode a
 
 ```typescript
 // wardex-setup.ts
-import { createWardex, defaultPolicy } from '@wardex/core';
+import { createWardex, defaultPolicy } from '@wardexai/core';
 
 const wardex = createWardex({
   policy: defaultPolicy(),
@@ -256,7 +256,7 @@ For a DeFi trading agent, you will want to allowlist the protocols your agent in
 
 ```typescript
 // defi-agent-setup.ts
-import { createWardex, defaultPolicy, mergePolicy } from '@wardex/core';
+import { createWardex, defaultPolicy, mergePolicy } from '@wardexai/core';
 
 const basePolicy = defaultPolicy();
 
@@ -306,7 +306,7 @@ import {
   defaultPolicy,
   wrapViemWalletClient,
   WardexBlockedError,
-} from '@wardex/core';
+} from '@wardexai/core';
 
 async function main() {
   // 1. Set up Wardex

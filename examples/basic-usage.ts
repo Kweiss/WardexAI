@@ -4,8 +4,8 @@
  * Demonstrates how to set up Wardex and evaluate transactions.
  */
 
-import { createWardex, defaultPolicy } from '@wardex/core';
-import type { ConversationContext } from '@wardex/core';
+import { createWardex, defaultPolicy } from '@wardexai/core';
+import type { ConversationContext } from '@wardexai/core';
 
 async function main() {
   // 1. Create a Wardex shield with default policy

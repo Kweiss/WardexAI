@@ -15,10 +15,10 @@
  * smart contract layer rejects out-of-scope transactions.
  */
 
-import { createWardex, defaultPolicy } from '@wardex/core';
-import type { TransactionRequest } from '@wardex/core';
-import { DelegationManager } from '@wardex/signer';
-import type { SessionKeyConfig } from '@wardex/signer';
+import { createWardex, defaultPolicy } from '@wardexai/core';
+import type { TransactionRequest } from '@wardexai/core';
+import { DelegationManager } from '@wardexai/signer';
+import type { SessionKeyConfig } from '@wardexai/signer';
 
 const UNISWAP_ROUTER = '0x68b3465833fb72a70ecdf485e0e4c7bd8665fc45';
 const AAVE_POOL = '0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2';

@@ -20,12 +20,12 @@
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { execFileSync, spawn, type ChildProcess } from 'node:child_process';
-import { createWardex, defaultPolicy } from '@wardex/core';
+import { createWardex, defaultPolicy } from '@wardexai/core';
 import type {
   ConversationContext,
   TransactionRequest,
-} from '@wardex/core';
-import { SessionManager } from '@wardex/signer';
+} from '@wardexai/core';
+import { SessionManager } from '@wardexai/signer';
 
 // ---------------------------------------------------------------------------
 // Environment

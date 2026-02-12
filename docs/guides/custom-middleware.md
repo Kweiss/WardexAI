@@ -9,7 +9,7 @@ Wardex's middleware pipeline is extensible. You can insert custom checks between
 Each middleware is an async function that receives a shared context and a `next()` function. Call `next()` to continue to the next stage. Don't call `next()` to short-circuit the pipeline.
 
 ```typescript
-import type { Middleware, MiddlewareContext } from '@wardex/core';
+import type { Middleware, MiddlewareContext } from '@wardexai/core';
 
 const myMiddleware: Middleware = async (ctx, next) => {
   // 1. Read from ctx (transaction, decoded, addressReputation, etc.)
@@ -43,7 +43,7 @@ This means your middleware has access to:
 ## Step 1: Register Custom Middleware
 
 ```typescript
-import { createWardex, defaultPolicy } from '@wardex/core';
+import { createWardex, defaultPolicy } from '@wardexai/core';
 
 const wardex = createWardex({
   policy: defaultPolicy(),

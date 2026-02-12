@@ -10,15 +10,15 @@ Get your AI agent protected in under 5 minutes.
 ## Install
 
 ```bash
-npm install @wardex/core @wardex/signer
+npm install @wardexai/core @wardexai/signer
 # Optional: on-chain intelligence
-npm install @wardex/intelligence
+npm install @wardexai/intelligence
 ```
 
 ## 1. Basic Setup (5 lines)
 
 ```typescript
-import { createWardex, defaultPolicy } from '@wardex/core';
+import { createWardex, defaultPolicy } from '@wardexai/core';
 
 const wardex = createWardex({
   policy: defaultPolicy(),
@@ -85,7 +85,7 @@ Wrap your existing ethers.js or viem provider — zero code changes required:
 
 ### ethers.js v6
 ```typescript
-import { wrapEthersProvider } from '@wardex/core/providers/ethers';
+import { wrapEthersProvider } from '@wardexai/core/providers/ethers';
 
 const protectedProvider = wrapEthersProvider(existingProvider, wardex);
 // Use protectedProvider exactly like your original provider
@@ -94,7 +94,7 @@ const protectedProvider = wrapEthersProvider(existingProvider, wardex);
 
 ### viem
 ```typescript
-import { wrapViemClient } from '@wardex/core/providers/viem';
+import { wrapViemClient } from '@wardexai/core/providers/viem';
 
 const protectedClient = wrapViemClient(existingClient, wardex);
 // Use protectedClient exactly like your original client
@@ -105,7 +105,7 @@ const protectedClient = wrapViemClient(existingClient, wardex);
 Scope your agent's signing authority with time-bounded, contract-limited sessions:
 
 ```typescript
-import { SessionManager } from '@wardex/signer';
+import { SessionManager } from '@wardexai/signer';
 
 const sessions = new SessionManager();
 const session = sessions.createSession({
@@ -127,12 +127,12 @@ if (!check.valid) {
 
 ### As MCP Server
 ```bash
-claude mcp add wardex npx @wardex/mcp-server
+claude mcp add wardex npx @wardexai/mcp-server
 ```
 
 ### As Skill with PreToolUse Hooks
 ```bash
-npm install @wardex/claude-skill
+npm install @wardexai/claude-skill
 # Merge settings-template.json into your .claude/settings.json
 ```
 

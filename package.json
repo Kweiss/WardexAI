@@ -1,5 +1,5 @@
 {
-  "name": "wardex",
+  "name": "wardexai",
   "private": true,
   "description": "Adaptive security SDK for AI agent wallets on Ethereum",
   "workspaces": [

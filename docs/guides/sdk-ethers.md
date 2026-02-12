@@ -12,20 +12,20 @@ Add Wardex security to an ethers.js v6 wallet in 5 minutes. Every `sendTransacti
 |---|---|
 | Node.js | 20+ |
 | ethers.js | v6 |
-| `@wardex/core` | latest |
+| `@wardexai/core` | latest |
 
 ---
 
 ## Step 1: Install Packages
 
 ```bash
-npm install @wardex/core ethers
+npm install @wardexai/core ethers
 ```
 
 If you want on-chain intelligence (address reputation, contract bytecode analysis), also install the intelligence package:
 
 ```bash
-npm install @wardex/intelligence
+npm install @wardexai/intelligence
 ```
 
 ---
@@ -34,7 +34,7 @@ npm install @wardex/intelligence
 
 ```typescript
 // wardex-setup.ts
-import { createWardex, defaultPolicy } from '@wardex/core';
+import { createWardex, defaultPolicy } from '@wardexai/core';
 
 const wardex = createWardex({
   policy: defaultPolicy(),
@@ -64,7 +64,7 @@ const wardex = createWardex({
 ```typescript
 // agent.ts
 import { ethers } from 'ethers';
-import { wrapEthersSigner } from '@wardex/core';
+import { wrapEthersSigner } from '@wardexai/core';
 
 const provider = new ethers.JsonRpcProvider('https://eth.llamarpc.com');
 const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
@@ -109,7 +109,7 @@ If the verdict is `approve` or `advise`, the transaction proceeds. If the verdic
 
 ```typescript
 // agent.ts
-import { wrapEthersSigner, WardexBlockedError } from '@wardex/core';
+import { wrapEthersSigner, WardexBlockedError } from '@wardexai/core';
 
 const protectedSigner = wrapEthersSigner(signer, wardex);
 
@@ -207,7 +207,7 @@ Add on-chain intelligence for address reputation lookups and contract bytecode a
 
 ```typescript
 // wardex-setup.ts
-import { createWardex, defaultPolicy } from '@wardex/core';
+import { createWardex, defaultPolicy } from '@wardexai/core';
 
 const wardex = createWardex({
   policy: defaultPolicy(),
@@ -242,7 +242,7 @@ For a DeFi trading agent, you will want to allowlist the protocols your agent in
 
 ```typescript
 // defi-agent-setup.ts
-import { createWardex, defaultPolicy, mergePolicy } from '@wardex/core';
+import { createWardex, defaultPolicy, mergePolicy } from '@wardexai/core';
 
 const basePolicy = defaultPolicy();
 
@@ -290,7 +290,7 @@ import {
   defaultPolicy,
   wrapEthersSigner,
   WardexBlockedError,
-} from '@wardex/core';
+} from '@wardexai/core';
 
 async function main() {
   // 1. Set up Wardex

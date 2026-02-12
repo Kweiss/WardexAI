@@ -7,8 +7,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { createWardex, defaultPolicy } from '@wardex/core';
-import type { TransactionRequest, SecurityPolicy } from '@wardex/core';
+import { createWardex, defaultPolicy } from '@wardexai/core';
+import type { TransactionRequest, SecurityPolicy } from '@wardexai/core';
 
 const KNOWN_CONTRACT = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'; // USDC
 const NEW_CONTRACT = '0xdead000000000000000000000000000000000099';

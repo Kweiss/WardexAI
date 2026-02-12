@@ -1,5 +1,5 @@
 {
-  "name": "@wardex/core",
+  "name": "@wardexai/core",
   "version": "0.1.0",
   "description": "Adaptive security for AI agent wallets - core evaluation engine",
   "main": "dist/index.js",
@@ -35,12 +35,12 @@
     "viem": "^2.21.0"
   },
   "peerDependencies": {
-    "@wardex/signer": "^0.1.0",
-    "@wardex/intelligence": "^0.1.0"
+    "@wardexai/signer": "^0.1.0",
+    "@wardexai/intelligence": "^0.1.0"
   },
   "peerDependenciesMeta": {
-    "@wardex/signer": { "optional": true },
-    "@wardex/intelligence": { "optional": true }
+    "@wardexai/signer": { "optional": true },
+    "@wardexai/intelligence": { "optional": true }
   },
   "license": "MIT"
 }

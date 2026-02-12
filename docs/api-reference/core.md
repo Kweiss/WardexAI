@@ -1,11 +1,11 @@
-# @wardex/core API Reference
+# @wardexai/core API Reference
 
 The core package provides the main Wardex security shield, policy management, output filtering, provider wrappers, and the middleware pipeline for evaluating AI agent transactions.
 
 ## Installation
 
 ```bash
-npm install @wardex/core
+npm install @wardexai/core
 ```
 
 ## Imports
@@ -31,7 +31,7 @@ import {
   createBehavioralComparator,
   riskAggregator,
   policyEngine,
-} from '@wardex/core';
+} from '@wardexai/core';
 ```
 
 ---
@@ -43,13 +43,13 @@ Creates a new Wardex security shield. This is the recommended entry point for in
 ### Import
 
 ```typescript
-import { createWardex } from '@wardex/core';
+import { createWardex } from '@wardexai/core';
 ```
 
 ### Usage
 
 ```typescript
-import { createWardex, defaultPolicy } from '@wardex/core';
+import { createWardex, defaultPolicy } from '@wardexai/core';
 
 const wardex = createWardex({
   policy: defaultPolicy(),
@@ -215,13 +215,13 @@ Lower-level factory that creates a `WardexShield` without input validation. Used
 ### Import
 
 ```typescript
-import { createShield } from '@wardex/core';
+import { createShield } from '@wardexai/core';
 ```
 
 ### Usage
 
 ```typescript
-import { createShield, defaultPolicy } from '@wardex/core';
+import { createShield, defaultPolicy } from '@wardexai/core';
 
 const shield = createShield({
   policy: defaultPolicy(),
@@ -562,7 +562,7 @@ Returns a default security policy with sensible defaults. This is the recommende
 ### Import
 
 ```typescript
-import { defaultPolicy } from '@wardex/core';
+import { defaultPolicy } from '@wardexai/core';
 ```
 
 ### Usage
@@ -601,13 +601,13 @@ Deep merges a partial policy override with a base policy. Allowlists and denylis
 ### Import
 
 ```typescript
-import { mergePolicy } from '@wardex/core';
+import { mergePolicy } from '@wardexai/core';
 ```
 
 ### Usage
 
 ```typescript
-import { defaultPolicy, mergePolicy } from '@wardex/core';
+import { defaultPolicy, mergePolicy } from '@wardexai/core';
 
 const base = defaultPolicy();
 const merged = mergePolicy(base, {
@@ -650,7 +650,7 @@ Creates a standalone output filter for sanitizing text and structured data. The 
 ### Import
 
 ```typescript
-import { createOutputFilter } from '@wardex/core';
+import { createOutputFilter } from '@wardexai/core';
 ```
 
 ### Usage
@@ -694,14 +694,14 @@ Wraps an ethers.js v6 Signer with a Proxy so that all `sendTransaction` calls ar
 ### Import
 
 ```typescript
-import { wrapEthersSigner } from '@wardex/core';
+import { wrapEthersSigner } from '@wardexai/core';
 ```
 
 ### Usage
 
 ```typescript
 import { ethers } from 'ethers';
-import { createWardex, defaultPolicy, wrapEthersSigner } from '@wardex/core';
+import { createWardex, defaultPolicy, wrapEthersSigner } from '@wardexai/core';
 
 const provider = new ethers.JsonRpcProvider('http://localhost:8545');
 const signer = await provider.getSigner();
@@ -758,7 +758,7 @@ Wraps a viem WalletClient with a Proxy so that all `sendTransaction` calls are e
 ### Import
 
 ```typescript
-import { wrapViemWalletClient } from '@wardex/core';
+import { wrapViemWalletClient } from '@wardexai/core';
 ```
 
 ### Usage
@@ -766,7 +766,7 @@ import { wrapViemWalletClient } from '@wardex/core';
 ```typescript
 import { createWalletClient, http } from 'viem';
 import { mainnet } from 'viem/chains';
-import { createWardex, defaultPolicy, wrapViemWalletClient } from '@wardex/core';
+import { createWardex, defaultPolicy, wrapViemWalletClient } from '@wardexai/core';
 
 const client = createWalletClient({
   chain: mainnet,
@@ -822,7 +822,7 @@ Custom error class thrown by provider wrappers when Wardex blocks a transaction.
 ### Import
 
 ```typescript
-import { WardexBlockedError } from '@wardex/core';
+import { WardexBlockedError } from '@wardexai/core';
 ```
 
 ### Usage
@@ -863,13 +863,13 @@ Composes an array of middleware functions into a single middleware using a Koa-s
 ### Import
 
 ```typescript
-import { compose } from '@wardex/core';
+import { compose } from '@wardexai/core';
 ```
 
 ### Usage
 
 ```typescript
-import { compose, createMiddlewareContext, createContextAnalyzer, riskAggregator, policyEngine } from '@wardex/core';
+import { compose, createMiddlewareContext, createContextAnalyzer, riskAggregator, policyEngine } from '@wardexai/core';
 
 const pipeline = compose([
   createContextAnalyzer().middleware,
@@ -908,7 +908,7 @@ Creates a fresh middleware context for a new evaluation. Provides default values
 ### Import
 
 ```typescript
-import { createMiddlewareContext } from '@wardex/core';
+import { createMiddlewareContext } from '@wardexai/core';
 ```
 
 ### Usage
@@ -945,7 +945,7 @@ The following middleware factories are exported for custom pipeline construction
 Creates the context analysis middleware for prompt injection detection.
 
 ```typescript
-import { createContextAnalyzer } from '@wardex/core';
+import { createContextAnalyzer } from '@wardexai/core';
 const { middleware } = createContextAnalyzer();
 ```
 
@@ -954,7 +954,7 @@ const { middleware } = createContextAnalyzer();
 Stateless middleware that decodes transaction calldata.
 
 ```typescript
-import { transactionDecoder } from '@wardex/core';
+import { transactionDecoder } from '@wardexai/core';
 ```
 
 ### createAddressChecker
@@ -962,7 +962,7 @@ import { transactionDecoder } from '@wardex/core';
 Creates the address checking middleware. Optionally accepts a reputation provider function.
 
 ```typescript
-import { createAddressChecker } from '@wardex/core';
+import { createAddressChecker } from '@wardexai/core';
 
 // Without intelligence (denylist-only)
 const checker = createAddressChecker();
@@ -978,7 +978,7 @@ const checker = createAddressChecker(
 Creates the value assessment middleware that calculates USD value at risk and determines the security tier.
 
 ```typescript
-import { createValueAssessor } from '@wardex/core';
+import { createValueAssessor } from '@wardexai/core';
 const assessor = createValueAssessor();
 ```
 
@@ -987,7 +987,7 @@ const assessor = createValueAssessor();
 Creates the contract bytecode analysis middleware. Optionally accepts an analysis provider function.
 
 ```typescript
-import { createContractChecker } from '@wardex/core';
+import { createContractChecker } from '@wardexai/core';
 
 // Without intelligence (bytecode pattern matching only)
 const checker = createContractChecker();
@@ -1003,7 +1003,7 @@ const checker = createContractChecker(
 Creates the behavioral anomaly detection middleware with four detectors: value anomaly, new contract interaction, transaction frequency, and timing patterns.
 
 ```typescript
-import { createBehavioralComparator } from '@wardex/core';
+import { createBehavioralComparator } from '@wardexai/core';
 const { middleware } = createBehavioralComparator();
 ```
 
@@ -1012,7 +1012,7 @@ const { middleware } = createBehavioralComparator();
 Stateless middleware that aggregates all individual risk scores into a weighted composite score.
 
 ```typescript
-import { riskAggregator } from '@wardex/core';
+import { riskAggregator } from '@wardexai/core';
 ```
 
 ### policyEngine
@@ -1020,5 +1020,5 @@ import { riskAggregator } from '@wardex/core';
 Stateless middleware that applies policy rules and produces the final `SecurityVerdict` based on the aggregated risk score, tier enforcement settings, and critical findings.
 
 ```typescript
-import { policyEngine } from '@wardex/core';
+import { policyEngine } from '@wardexai/core';
 ```

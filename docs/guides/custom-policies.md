@@ -7,7 +7,7 @@ The security policy controls every aspect of how Wardex evaluates transactions. 
 ## Step 1: Start with the Default Policy
 
 ```typescript
-import { createWardex, defaultPolicy } from '@wardex/core';
+import { createWardex, defaultPolicy } from '@wardexai/core';
 
 const policy = defaultPolicy();
 // Returns a fully configured policy with sensible defaults
@@ -115,7 +115,7 @@ policy.tiers[2].enforcement.timeLockSeconds = 300;
 ### Custom Tier Example: Protocol-Specific
 
 ```typescript
-import type { SecurityTierConfig } from '@wardex/core';
+import type { SecurityTierConfig } from '@wardexai/core';
 
 // Create a custom tier for Uniswap operations up to $50K
 const uniswapTier: SecurityTierConfig = {

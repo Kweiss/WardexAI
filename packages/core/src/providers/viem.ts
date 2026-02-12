@@ -5,7 +5,7 @@
  * the Wardex evaluation pipeline before reaching the network.
  *
  * Usage:
- *   import { createWardex, wrapViemWalletClient } from '@wardex/core';
+ *   import { createWardex, wrapViemWalletClient } from '@wardexai/core';
  *   const wardex = createWardex({ ... });
  *   const protectedClient = wrapViemWalletClient(walletClient, wardex);
  *   await protectedClient.sendTransaction({ to, value }); // evaluated by Wardex

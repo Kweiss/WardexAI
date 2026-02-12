@@ -1,4 +1,4 @@
-# @wardex/mcp-server API Reference
+# @wardexai/mcp-server API Reference
 
 The MCP server exposes Wardex wallet security tools to Claude Code and any MCP-compatible AI agent framework via the Model Context Protocol.
 
@@ -136,7 +136,7 @@ Scans text for private keys, seed phrases, mnemonic sequences, and keystore data
 ## CLI Arguments
 
 ```bash
-npx @wardex/mcp-server [--transport stdio|http] [--port 3100]
+npx @wardexai/mcp-server [--transport stdio|http] [--port 3100]
 ```
 
 | Argument | Default | Description |
@@ -182,11 +182,11 @@ MCP Client (Claude Code, Cursor, etc.)
     |
     | MCP protocol (stdio or HTTP)
     v
-@wardex/mcp-server
+@wardexai/mcp-server
     |
     | initShield() → createWardex()
     v
-@wardex/core WardexShield
+@wardexai/core WardexShield
     |
     | 9-stage middleware pipeline
     v
@@ -201,5 +201,5 @@ The server creates a single `WardexShield` instance at startup and shares it acr
 
 - **[MCP Server Guide](../guides/mcp-server.md)** -- Step-by-step setup and configuration
 - **[Claude Code Skill](../guides/claude-skill.md)** -- Auto-interception with PreToolUse hooks
-- **[@wardex/core API](./core.md)** -- Full API reference for the evaluation engine
+- **[@wardexai/core API](./core.md)** -- Full API reference for the evaluation engine
 - **[Types Reference](./types.md)** -- All TypeScript types

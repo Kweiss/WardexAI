@@ -1,11 +1,11 @@
-# @wardex/signer API Reference
+# @wardexai/signer API Reference
 
 The signer package provides isolated key management, session key lifecycle, delegation management, and enforcer mapping for AI agent wallets. Key material never touches the AI agent process.
 
 ## Installation
 
 ```bash
-npm install @wardex/signer
+npm install @wardexai/signer
 ```
 
 ## Imports
@@ -35,7 +35,7 @@ import {
   decodeValueLte,
   decodeTimestamp,
   decodeNativeTokenPeriod,
-} from '@wardex/signer';
+} from '@wardexai/signer';
 ```
 
 ---
@@ -47,7 +47,7 @@ The signer server runs in an isolated OS process and holds the encrypted private
 ### Import
 
 ```typescript
-import { SignerServer } from '@wardex/signer';
+import { SignerServer } from '@wardexai/signer';
 ```
 
 ### Constructor
@@ -116,7 +116,7 @@ The signer client is used by the agent process to communicate with the isolated 
 ### Import
 
 ```typescript
-import { SignerClient } from '@wardex/signer';
+import { SignerClient } from '@wardexai/signer';
 ```
 
 ### Constructor
@@ -234,13 +234,13 @@ Encrypts a private key for storage at rest using AES-256-GCM with scrypt key der
 ### Import
 
 ```typescript
-import { encryptPrivateKey } from '@wardex/signer';
+import { encryptPrivateKey } from '@wardexai/signer';
 ```
 
 ### Usage
 
 ```typescript
-import { encryptPrivateKey } from '@wardex/signer';
+import { encryptPrivateKey } from '@wardexai/signer';
 import fs from 'node:fs';
 
 const encrypted = encryptPrivateKey(
@@ -280,13 +280,13 @@ Decrypts a private key from an encrypted key file.
 ### Import
 
 ```typescript
-import { decryptPrivateKey } from '@wardex/signer';
+import { decryptPrivateKey } from '@wardexai/signer';
 ```
 
 ### Usage
 
 ```typescript
-import { decryptPrivateKey } from '@wardex/signer';
+import { decryptPrivateKey } from '@wardexai/signer';
 import fs from 'node:fs';
 
 const keyFile = JSON.parse(fs.readFileSync('/secure/keyfile.json', 'utf8'));
@@ -317,7 +317,7 @@ Generates a cryptographic HMAC-SHA256 approval token that proves Wardex evaluate
 ### Import
 
 ```typescript
-import { generateApprovalToken } from '@wardex/signer';
+import { generateApprovalToken } from '@wardexai/signer';
 ```
 
 ### Usage
@@ -350,7 +350,7 @@ Verifies an approval token against a transaction hash using timing-safe comparis
 ### Import
 
 ```typescript
-import { verifyApprovalToken } from '@wardex/signer';
+import { verifyApprovalToken } from '@wardexai/signer';
 ```
 
 ### Usage
@@ -394,7 +394,7 @@ Manages ERC-7715 scoped session keys for AI agent wallets. Session keys allow an
 ### Import
 
 ```typescript
-import { SessionManager } from '@wardex/signer';
+import { SessionManager } from '@wardexai/signer';
 ```
 
 ### Constructor
@@ -716,7 +716,7 @@ Key design: `createDelegation()` does not sign. Signing requires the owner's pri
 ### Import
 
 ```typescript
-import { DelegationManager } from '@wardex/signer';
+import { DelegationManager } from '@wardexai/signer';
 ```
 
 ### Constructor
@@ -1053,13 +1053,13 @@ Maps a Wardex `SessionKeyConfig` to an array of caveat terms for a MetaMask Dele
 ### Import
 
 ```typescript
-import { mapSessionConfigToCaveats } from '@wardex/signer';
+import { mapSessionConfigToCaveats } from '@wardexai/signer';
 ```
 
 ### Usage
 
 ```typescript
-import { mapSessionConfigToCaveats, getDefaultEnforcerAddresses } from '@wardex/signer';
+import { mapSessionConfigToCaveats, getDefaultEnforcerAddresses } from '@wardexai/signer';
 
 const caveats = mapSessionConfigToCaveats(
   {
@@ -1105,7 +1105,7 @@ Returns the canonical enforcer contract addresses for MetaMask Delegation Framew
 ### Import
 
 ```typescript
-import { getDefaultEnforcerAddresses } from '@wardex/signer';
+import { getDefaultEnforcerAddresses } from '@wardexai/signer';
 ```
 
 ### Usage

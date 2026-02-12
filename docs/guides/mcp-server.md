@@ -11,10 +11,10 @@ Wardex ships an MCP (Model Context Protocol) server that exposes wallet security
 Register the Wardex MCP server with Claude Code:
 
 ```bash
-claude mcp add wardex npx @wardex/mcp-server
+claude mcp add wardex npx @wardexai/mcp-server
 ```
 
-That single command tells Claude Code to launch `@wardex/mcp-server` as a child process and expose its tools in every conversation. No config files to edit.
+That single command tells Claude Code to launch `@wardexai/mcp-server` as a child process and expose its tools in every conversation. No config files to edit.
 
 To verify it registered:
 
@@ -25,7 +25,7 @@ claude mcp list
 Expected output:
 
 ```
-wardex: npx @wardex/mcp-server (stdio)
+wardex: npx @wardexai/mcp-server (stdio)
 ```
 
 ---
@@ -217,7 +217,7 @@ The MCP server reads configuration from environment variables. Set them before l
 To pass environment variables through Claude Code:
 
 ```bash
-claude mcp add wardex -e WARDEX_MODE=guardian npx @wardex/mcp-server
+claude mcp add wardex -e WARDEX_MODE=guardian npx @wardexai/mcp-server
 ```
 
 ---
@@ -229,7 +229,7 @@ By default the MCP server uses stdio (standard input/output), which works when t
 ### Start the HTTP server
 
 ```bash
-npx @wardex/mcp-server --transport http --port 3100
+npx @wardexai/mcp-server --transport http --port 3100
 ```
 
 Expected output:
@@ -282,7 +282,7 @@ You can also configure HTTP transport via environment variables instead of CLI f
 ```bash
 export WARDEX_TRANSPORT=http
 export WARDEX_PORT=3100
-npx @wardex/mcp-server
+npx @wardexai/mcp-server
 ```
 
 ---
@@ -294,11 +294,11 @@ Claude Code (or any MCP client)
     |
     |  MCP protocol (stdio or HTTP)
     v
-@wardex/mcp-server
+@wardexai/mcp-server
     |
     |  createWardex()
     v
-@wardex/core  ──>  9-stage middleware pipeline
+@wardexai/core  ──>  9-stage middleware pipeline
     |                  contextAnalyzer
     |                  transactionDecoder
     |                  valueAssessor

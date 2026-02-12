@@ -1,6 +1,6 @@
 /**
  * Re-export types used by the intelligence package.
- * These mirror the types from @wardex/core to avoid a circular dependency.
+ * These mirror the types from @wardexai/core to avoid a circular dependency.
  */
 
 export interface AddressReputation {

@@ -1,5 +1,5 @@
 {
-  "name": "@wardex/intelligence",
+  "name": "@wardexai/intelligence",
   "version": "0.1.0",
   "description": "Threat intelligence for Wardex - on-chain monitoring, address reputation, contract analysis",
   "main": "dist/index.js",

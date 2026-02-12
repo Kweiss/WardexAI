@@ -11,7 +11,7 @@ import {
   verifyApprovalToken,
   encryptPrivateKey,
   decryptPrivateKey,
-} from '@wardex/signer';
+} from '@wardexai/signer';
 
 describe('Approval Token Management', () => {
   const SHARED_SECRET = 'test-shared-secret-for-wardex-unit-tests';

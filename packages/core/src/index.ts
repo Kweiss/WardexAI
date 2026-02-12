@@ -1,5 +1,5 @@
 /**
- * @wardex/core
+ * @wardexai/core
  *
  * Adaptive security for AI agent wallets.
  * An immune system that protects AI agents from prompt injection,

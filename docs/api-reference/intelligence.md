@@ -1,14 +1,14 @@
-# @wardex/intelligence API Reference
+# @wardexai/intelligence API Reference
 
 On-chain threat intelligence for Wardex. Provides address reputation scoring, contract bytecode analysis, and denylist management.
 
 ## Installation
 
 ```bash
-npm install @wardex/intelligence
+npm install @wardexai/intelligence
 ```
 
-> **Note**: This is an optional package. `@wardex/core` works standalone without it. When installed, `shield.ts` dynamically imports it and wires the intelligence provider into the `addressChecker` and `contractChecker` middleware.
+> **Note**: This is an optional package. `@wardexai/core` works standalone without it. When installed, `shield.ts` dynamically imports it and wires the intelligence provider into the `addressChecker` and `contractChecker` middleware.
 
 ---
 
@@ -19,7 +19,7 @@ Creates an intelligence provider that fetches on-chain data via JSON-RPC.
 ### Import
 
 ```typescript
-import { createIntelligenceProvider } from '@wardex/intelligence';
+import { createIntelligenceProvider } from '@wardexai/intelligence';
 ```
 
 ### Usage
@@ -162,7 +162,7 @@ await intel.refresh();
 Loads a denylist from a JSON file.
 
 ```typescript
-import { loadDenylist } from '@wardex/intelligence';
+import { loadDenylist } from '@wardexai/intelligence';
 
 const entries = loadDenylist('./denylists/mainnet.json');
 ```
@@ -185,7 +185,7 @@ const entries = loadDenylist('./denylists/mainnet.json');
 Saves a denylist to a JSON file.
 
 ```typescript
-import { saveDenylist, createDenylistEntry } from '@wardex/intelligence';
+import { saveDenylist, createDenylistEntry } from '@wardexai/intelligence';
 
 const entry = createDenylistEntry(
   '0xbad...',
@@ -202,7 +202,7 @@ saveDenylist('./denylists/mainnet.json', [entry]);
 Creates a properly formatted denylist entry.
 
 ```typescript
-import { createDenylistEntry } from '@wardex/intelligence';
+import { createDenylistEntry } from '@wardexai/intelligence';
 
 const entry = createDenylistEntry(
   '0xdead000000000000000000000000000000000001',
@@ -220,7 +220,7 @@ const entry = createDenylistEntry(
 Low-level bytecode analysis function. Used internally by `getContractAnalysis()` but also available for direct use.
 
 ```typescript
-import { analyzeContractBytecode } from '@wardex/intelligence';
+import { analyzeContractBytecode } from '@wardexai/intelligence';
 
 const analysis = analyzeContractBytecode('0x6080604052...');
 
@@ -242,10 +242,10 @@ console.log(analysis);
 
 ## Wiring into WardexShield
 
-When `@wardex/intelligence` is installed and `intelligence` config is provided, `shield.ts` automatically wires it in:
+When `@wardexai/intelligence` is installed and `intelligence` config is provided, `shield.ts` automatically wires it in:
 
 ```typescript
-import { createWardex, defaultPolicy } from '@wardex/core';
+import { createWardex, defaultPolicy } from '@wardexai/core';
 
 const wardex = createWardex({
   policy: defaultPolicy(),

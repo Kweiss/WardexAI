@@ -8,7 +8,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node node_modules/@wardex/claude-skill/hooks/evaluate-transaction.mjs",
+            "command": "node node_modules/@wardexai/claude-skill/hooks/evaluate-transaction.mjs",
             "timeout": 15,
             "statusMessage": "Wardex: Evaluating transaction security..."
           }

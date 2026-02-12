@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 /**
- * @wardex/mcp-server
+ * @wardexai/mcp-server
  *
  * MCP server that exposes Wardex wallet security tools to
  * Claude Code and other MCP-compatible AI agent frameworks.
  *
  * Usage (stdio - default, for Claude Code):
- *   claude mcp add wardex npx @wardex/mcp-server
+ *   claude mcp add wardex npx @wardexai/mcp-server
  *
  * Usage (HTTP - for remote agents / multi-client):
- *   npx @wardex/mcp-server --transport http --port 3100
+ *   npx @wardexai/mcp-server --transport http --port 3100
  */
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
@@ -20,12 +20,12 @@ import {
   CallToolRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { createServer as createHttpServer } from 'node:http';
-import { createWardex, defaultPolicy } from '@wardex/core';
+import { createWardex, defaultPolicy } from '@wardexai/core';
 import type {
   WardexShield,
   TransactionRequest,
   SecurityVerdict,
-} from '@wardex/core';
+} from '@wardexai/core';
 
 // ---------------------------------------------------------------------------
 // Shield initialization

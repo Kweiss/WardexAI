@@ -14,10 +14,10 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { createWardex, defaultPolicy } from '@wardex/core';
-import type { TransactionRequest } from '@wardex/core';
-import { DelegationManager } from '@wardex/signer';
-import type { SessionKeyConfig, DelegationManagerConfig } from '@wardex/signer';
+import { createWardex, defaultPolicy } from '@wardexai/core';
+import type { TransactionRequest } from '@wardexai/core';
+import { DelegationManager } from '@wardexai/signer';
+import type { SessionKeyConfig, DelegationManagerConfig } from '@wardexai/signer';
 
 // ---------------------------------------------------------------------------
 // Constants

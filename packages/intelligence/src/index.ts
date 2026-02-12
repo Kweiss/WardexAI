@@ -1,5 +1,5 @@
 /**
- * @wardex/intelligence
+ * @wardexai/intelligence
  *
  * Threat intelligence for Wardex.
  * On-chain monitoring, address reputation, contract analysis.

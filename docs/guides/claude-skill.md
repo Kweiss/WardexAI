@@ -11,17 +11,17 @@ No changes to your agent code. No explicit `wardex_evaluate_transaction` calls. 
 Install the package and copy the skill and hook configuration into your project:
 
 ```bash
-npm install @wardex/claude-skill
+npm install @wardexai/claude-skill
 ```
 
 Then set up the skill directory and hooks:
 
 ```bash
 # Copy the skill definition (SKILL.md, commands, hooks)
-cp -r node_modules/@wardex/claude-skill/.claude/skills/wardex .claude/skills/
+cp -r node_modules/@wardexai/claude-skill/.claude/skills/wardex .claude/skills/
 
 # Copy the hook configuration
-cp node_modules/@wardex/claude-skill/hooks/pre-transaction.json .claude/hooks/
+cp node_modules/@wardexai/claude-skill/hooks/pre-transaction.json .claude/hooks/
 ```
 
 Alternatively, merge the hook configuration directly into your existing `.claude/settings.json`:
@@ -35,7 +35,7 @@ Alternatively, merge the hook configuration directly into your existing `.claude
         "hooks": [
           {
             "type": "command",
-            "command": "node node_modules/@wardex/claude-skill/hooks/evaluate-transaction.mjs",
+            "command": "node node_modules/@wardexai/claude-skill/hooks/evaluate-transaction.mjs",
             "timeout": 15,
             "statusMessage": "Wardex: Evaluating transaction security..."
           }
@@ -209,17 +209,17 @@ Wardex offers three integration paths. Choose based on your setup:
 |-------------|----------|--------------|
 | **Claude Code Skill** (this guide) | Claude Code users who want zero-config protection | PreToolUse hooks intercept wallet tool calls automatically |
 | **MCP Server** | Any MCP-compatible agent runtime, or when you want on-demand tool access | Claude (or another agent) explicitly calls `wardex_evaluate_transaction` |
-| **Direct SDK** | Custom TypeScript agents, server-side applications | Import `@wardex/core` and call `wardex.evaluate()` in your own code |
+| **Direct SDK** | Custom TypeScript agents, server-side applications | Import `@wardexai/core` and call `wardex.evaluate()` in your own code |
 
 You can combine them. A common pattern is to use both the skill (automatic interception) and the MCP server (explicit evaluation when Claude needs it):
 
 ```bash
 # Add the MCP server for explicit tool access
-claude mcp add wardex npx @wardex/mcp-server
+claude mcp add wardex npx @wardexai/mcp-server
 
 # Install the skill for automatic interception
-npm install @wardex/claude-skill
-cp -r node_modules/@wardex/claude-skill/.claude/skills/wardex .claude/skills/
+npm install @wardexai/claude-skill
+cp -r node_modules/@wardexai/claude-skill/.claude/skills/wardex .claude/skills/
 ```
 
 With both installed, every wallet tool call is automatically screened by the hook, and Claude can also call Wardex tools directly for pre-screening addresses or filtering output.

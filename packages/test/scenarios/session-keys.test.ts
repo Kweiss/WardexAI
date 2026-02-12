@@ -11,8 +11,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { SessionManager } from '@wardex/signer';
-import type { SessionKeyConfig } from '@wardex/signer';
+import { SessionManager } from '@wardexai/signer';
+import type { SessionKeyConfig } from '@wardexai/signer';
 
 const UNISWAP_ROUTER = '0x68b3465833fb72a70ecdf485e0e4c7bd8665fc45';
 const AAVE_POOL = '0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2';

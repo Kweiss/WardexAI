@@ -1,5 +1,5 @@
 {
-  "name": "@wardex/signer",
+  "name": "@wardexai/signer",
   "version": "0.1.0",
   "description": "Isolated signer service for Wardex - key material never touches the AI agent process",
   "main": "dist/index.js",

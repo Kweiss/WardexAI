@@ -151,8 +151,8 @@ async function main() {
 
   // Evaluate using Wardex core (inline, no IPC needed for evaluation)
   try {
-    // Dynamic import of @wardex/core
-    const { createWardex, defaultPolicy } = await import('@wardex/core');
+    // Dynamic import of @wardexai/core
+    const { createWardex, defaultPolicy } = await import('@wardexai/core');
 
     const wardex = createWardex({
       policy: defaultPolicy(),

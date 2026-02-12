@@ -7,7 +7,7 @@
  * Usage:
  *
  * ```typescript
- * import { createWardex, defaultPolicy } from '@wardex/core';
+ * import { createWardex, defaultPolicy } from '@wardexai/core';
  *
  * const wardex = createWardex({
  *   policy: defaultPolicy(),

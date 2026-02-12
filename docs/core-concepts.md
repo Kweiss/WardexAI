@@ -9,7 +9,7 @@ A technical deep dive into Wardex's architecture. Read [How It Works](./how-it-w
 The `WardexShield` is the central orchestrator. It manages the middleware pipeline, tracks state, produces verdicts, and maintains the audit trail.
 
 ```typescript
-import { createWardex, defaultPolicy } from '@wardex/core';
+import { createWardex, defaultPolicy } from '@wardexai/core';
 
 const wardex = createWardex({
   policy: defaultPolicy(),

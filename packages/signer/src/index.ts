@@ -1,5 +1,5 @@
 /**
- * @wardex/signer
+ * @wardexai/signer
  *
  * Isolated signer implementations for Wardex.
  * Key material never touches the AI agent process.

@@ -52,16 +52,16 @@ export function createShield(config: WardexConfig): WardexShield {
 
   // Wire intelligence provider into address and contract middleware when configured.
   // The intelligence package is an optional peer dependency - we use dynamic import
-  // so that @wardex/core works standalone without @wardex/intelligence installed.
+  // so that @wardexai/core works standalone without @wardexai/intelligence installed.
   let addressChecker: Middleware;
   let contractChecker: Middleware;
 
   if (config.intelligence) {
-    // Lazy-load intelligence provider. If @wardex/intelligence isn't installed,
+    // Lazy-load intelligence provider. If @wardexai/intelligence isn't installed,
     // fall back to stub middleware with no external reputation lookups.
     try {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { createIntelligenceProvider } = require('@wardex/intelligence') as {
+      const { createIntelligenceProvider } = require('@wardexai/intelligence') as {
         createIntelligenceProvider: (cfg: {
           rpcUrl: string;
           chainId: number;
@@ -89,7 +89,7 @@ export function createShield(config: WardexConfig): WardexShield {
         async (address, _chainId) => intel.getContractAnalysis(address),
       );
     } catch {
-      // @wardex/intelligence not installed - use stubs
+      // @wardexai/intelligence not installed - use stubs
       addressChecker = createAddressChecker();
       contractChecker = createContractChecker();
     }

@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { analyzeContractBytecode } from '@wardex/intelligence';
+import { analyzeContractBytecode } from '@wardexai/intelligence';
 
 describe('Contract Bytecode Analysis', () => {
   it('should detect SELFDESTRUCT opcode', () => {

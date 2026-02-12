@@ -11,15 +11,15 @@ Session keys give an AI agent scoped permission to transact within strict, pre-d
 | Requirement | Version |
 |---|---|
 | Node.js | 20+ |
-| `@wardex/signer` | latest |
-| `@wardex/core` | latest (for double-check with shield) |
+| `@wardexai/signer` | latest |
+| `@wardexai/core` | latest (for double-check with shield) |
 
 ---
 
 ## Step 1: Install Packages
 
 ```bash
-npm install @wardex/signer @wardex/core
+npm install @wardexai/signer @wardexai/core
 ```
 
 ---
@@ -28,7 +28,7 @@ npm install @wardex/signer @wardex/core
 
 ```typescript
 // session-setup.ts
-import { SessionManager } from '@wardex/signer';
+import { SessionManager } from '@wardexai/signer';
 
 const sessions = new SessionManager();
 ```
@@ -214,8 +214,8 @@ For maximum protection, validate transactions against **both** the Wardex Shield
 
 ```typescript
 // defi-agent.ts
-import { createWardex, defaultPolicy } from '@wardex/core';
-import { SessionManager } from '@wardex/signer';
+import { createWardex, defaultPolicy } from '@wardexai/core';
+import { SessionManager } from '@wardexai/signer';
 
 // Layer 1: Wardex Shield (risk evaluation pipeline)
 const wardex = createWardex({
@@ -343,8 +343,8 @@ console.log(`Cleaned up ${removed} expired/revoked sessions`);
 
 ```typescript
 // session-keys-agent.ts
-import { createWardex, defaultPolicy } from '@wardex/core';
-import { SessionManager } from '@wardex/signer';
+import { createWardex, defaultPolicy } from '@wardexai/core';
+import { SessionManager } from '@wardexai/signer';
 
 const UNISWAP_ROUTER = '0x68b3465833fb72a70ecdf485e0e4c7bd8665fc45';
 const AAVE_POOL = '0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2';

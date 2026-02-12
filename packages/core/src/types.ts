@@ -1,5 +1,5 @@
 /**
- * @wardex/core - Core type definitions
+ * @wardexai/core - Core type definitions
  *
  * These interfaces define the entire Wardex SDK contract.
  * Every other component builds against these types.

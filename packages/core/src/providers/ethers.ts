@@ -5,7 +5,7 @@
  * the Wardex evaluation pipeline before reaching the network.
  *
  * Usage:
- *   import { createWardex, wrapEthersProvider } from '@wardex/core';
+ *   import { createWardex, wrapEthersProvider } from '@wardexai/core';
  *   const wardex = createWardex({ ... });
  *   const protectedSigner = wrapEthersProvider(signer, wardex);
  *   await protectedSigner.sendTransaction({ to, value }); // evaluated by Wardex

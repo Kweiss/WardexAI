@@ -1,5 +1,5 @@
 {
-  "name": "@wardex/mcp-server",
+  "name": "@wardexai/mcp-server",
   "version": "0.1.0",
   "description": "MCP server for Wardex - exposes wallet security tools to Claude Code and other MCP clients",
   "main": "dist/index.js",
@@ -32,9 +32,9 @@
     "wardex"
   ],
   "dependencies": {
-    "@wardex/core": "^0.1.0",
-    "@wardex/signer": "^0.1.0",
-    "@wardex/intelligence": "^0.1.0",
+    "@wardexai/core": "^0.1.0",
+    "@wardexai/signer": "^0.1.0",
+    "@wardexai/intelligence": "^0.1.0",
     "@modelcontextprotocol/sdk": "^1.0.0"
   },
   "license": "MIT"

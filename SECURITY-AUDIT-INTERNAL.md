@@ -492,10 +492,10 @@ The salt in DelegationManager.createDelegation() is random, but when the delegat
 
 | Package | Files | Lines |
 |---------|-------|-------|
-| @wardex/core | shield.ts, types.ts, policy.ts, pipeline.ts, output-filter.ts, context-analyzer.ts, transaction-decoder.ts, value-assessor.ts, address-checker.ts, contract-checker.ts, behavioral-comparator.ts, risk-aggregator.ts, policy-engine.ts, ethers.ts, viem.ts | ~2,100 |
-| @wardex/signer | isolated-process.ts, session-manager.ts, delegation-manager.ts, enforcer-mapping.ts | ~1,360 |
-| @wardex/intelligence | provider.ts, contract-analyzer.ts, denylist.ts | ~400 |
-| @wardex/mcp-server | index.ts | ~356 |
-| @wardex/claude-skill | evaluate-transaction.mjs | ~213 |
-| @wardex/contracts | WardexValidationModule.sol, Deploy.s.sol, Verify.s.sol | ~440 |
+| @wardexai/core | shield.ts, types.ts, policy.ts, pipeline.ts, output-filter.ts, context-analyzer.ts, transaction-decoder.ts, value-assessor.ts, address-checker.ts, contract-checker.ts, behavioral-comparator.ts, risk-aggregator.ts, policy-engine.ts, ethers.ts, viem.ts | ~2,100 |
+| @wardexai/signer | isolated-process.ts, session-manager.ts, delegation-manager.ts, enforcer-mapping.ts | ~1,360 |
+| @wardexai/intelligence | provider.ts, contract-analyzer.ts, denylist.ts | ~400 |
+| @wardexai/mcp-server | index.ts | ~356 |
+| @wardexai/claude-skill | evaluate-transaction.mjs | ~213 |
+| @wardexai/contracts | WardexValidationModule.sol, Deploy.s.sol, Verify.s.sol | ~440 |
 | **Total** | **21 files** | **~4,870 lines** |

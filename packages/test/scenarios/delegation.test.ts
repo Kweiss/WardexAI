@@ -29,12 +29,12 @@ import {
   decodeValueLte,
   decodeTimestamp,
   decodeNativeTokenPeriod,
-} from '@wardex/signer';
+} from '@wardexai/signer';
 import type {
   SessionKeyConfig,
   DelegationManagerConfig,
   EnforcerAddresses,
-} from '@wardex/signer';
+} from '@wardexai/signer';
 
 // ---------------------------------------------------------------------------
 // Constants

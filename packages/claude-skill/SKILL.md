@@ -125,13 +125,13 @@ value.
 ### As MCP Server + Skill
 ```bash
 # Add the MCP server
-claude mcp add wardex npx @wardex/mcp-server
+claude mcp add wardex npx @wardexai/mcp-server
 
 # Copy the skill to your project
-cp -r node_modules/@wardex/claude-skill/.claude/skills/wardex .claude/skills/
+cp -r node_modules/@wardexai/claude-skill/.claude/skills/wardex .claude/skills/
 
 # Copy the hooks configuration
-cp node_modules/@wardex/claude-skill/hooks/pre-transaction.json .claude/hooks/
+cp node_modules/@wardexai/claude-skill/hooks/pre-transaction.json .claude/hooks/
 ```
 
 ### Hooks Only (for existing MCP server)

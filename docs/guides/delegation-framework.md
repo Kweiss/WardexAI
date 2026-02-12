@@ -20,10 +20,10 @@ Wardex's `DelegationManager` handles all of this: mapping your `SessionKeyConfig
 
 ## Step 1: Install
 
-The `DelegationManager` is included in `@wardex/signer`:
+The `DelegationManager` is included in `@wardexai/signer`:
 
 ```bash
-npm install @wardex/signer
+npm install @wardexai/signer
 ```
 
 No dependency on `@metamask/delegation-toolkit` at runtime. Wardex handles all ABI encoding internally using ethers.js.
@@ -35,7 +35,7 @@ No dependency on `@metamask/delegation-toolkit` at runtime. Wardex handles all A
 Initialize the manager with your chain ID. The canonical MetaMask Delegation Framework v1.3.0 contract addresses are built in.
 
 ```typescript
-import { DelegationManager } from '@wardex/signer';
+import { DelegationManager } from '@wardexai/signer';
 
 const delegations = new DelegationManager({
   chainId: 8453, // Base
@@ -205,7 +205,7 @@ This updates the daily volume counter used by off-chain validation.
 For maximum safety, validate with both the Wardex SDK and the delegation:
 
 ```typescript
-import { createWardex, defaultPolicy } from '@wardex/core';
+import { createWardex, defaultPolicy } from '@wardexai/core';
 
 const wardex = createWardex({ policy: defaultPolicy(), mode: 'adaptive' });
 
@@ -330,7 +330,7 @@ Wardex uses the canonical MetaMask Delegation Framework v1.3.0 deployment. These
 To retrieve these programmatically:
 
 ```typescript
-import { getDefaultEnforcerAddresses } from '@wardex/signer';
+import { getDefaultEnforcerAddresses } from '@wardexai/signer';
 
 const addresses = getDefaultEnforcerAddresses();
 console.log(addresses.allowedTargets);

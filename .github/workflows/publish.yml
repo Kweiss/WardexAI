@@ -46,35 +46,35 @@ jobs:
         run: forge test -vvv
 
       # Publish packages in dependency order
-      - name: Publish @wardex/core
+      - name: Publish @wardexai/core
         working-directory: packages/core
         run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         continue-on-error: true # Skip if version already published
 
-      - name: Publish @wardex/intelligence
+      - name: Publish @wardexai/intelligence
         working-directory: packages/intelligence
         run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         continue-on-error: true
 
-      - name: Publish @wardex/signer
+      - name: Publish @wardexai/signer
         working-directory: packages/signer
         run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         continue-on-error: true
 
-      - name: Publish @wardex/mcp-server
+      - name: Publish @wardexai/mcp-server
         working-directory: packages/mcp-server
         run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         continue-on-error: true
 
-      - name: Publish @wardex/claude-skill
+      - name: Publish @wardexai/claude-skill
         working-directory: packages/claude-skill
         run: npm publish --provenance --access public
         env:

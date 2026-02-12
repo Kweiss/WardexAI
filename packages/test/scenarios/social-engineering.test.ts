@@ -11,8 +11,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { createWardex, defaultPolicy } from '@wardex/core';
-import type { ConversationContext, TransactionRequest } from '@wardex/core';
+import { createWardex, defaultPolicy } from '@wardexai/core';
+import type { ConversationContext, TransactionRequest } from '@wardexai/core';
 
 const ATTACKER_ADDRESS = '0xdead000000000000000000000000000000000001';
 const LEGITIMATE_ADDRESS = '0x1234567890abcdef1234567890abcdef12345678';

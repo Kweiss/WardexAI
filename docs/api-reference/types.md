@@ -1,6 +1,6 @@
 # TypeScript Types Reference
 
-Complete type definitions for the Wardex SDK. All types are exported from `@wardex/core` and `@wardex/signer`.
+Complete type definitions for the Wardex SDK. All types are exported from `@wardexai/core` and `@wardexai/signer`.
 
 ---
 
@@ -11,7 +11,7 @@ Complete type definitions for the Wardex SDK. All types are exported from `@ward
 Top-level configuration for creating a Wardex shield.
 
 ```typescript
-import type { WardexConfig } from '@wardex/core';
+import type { WardexConfig } from '@wardexai/core';
 
 interface WardexConfig {
   policy: SecurityPolicy;              // Operator-defined security policy
@@ -530,7 +530,7 @@ interface WardexSigner {
 
 ### `SessionKey`
 
-A session key with its metadata (from `@wardex/signer`).
+A session key with its metadata (from `@wardexai/signer`).
 
 ```typescript
 interface SessionKey {
@@ -569,7 +569,7 @@ interface SessionValidationResult {
 
 ## Delegation Types
 
-From `@wardex/signer`.
+From `@wardexai/signer`.
 
 ### `DelegationManagerConfig`
 

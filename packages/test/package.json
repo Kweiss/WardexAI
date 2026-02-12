@@ -1,5 +1,5 @@
 {
-  "name": "@wardex/test",
+  "name": "@wardexai/test",
   "version": "0.1.0",
   "private": true,
   "description": "Integration tests for Wardex - covers all 7 attack vectors",
@@ -9,9 +9,9 @@
     "test:watch": "vitest"
   },
   "devDependencies": {
-    "@wardex/core": "^0.1.0",
-    "@wardex/signer": "^0.1.0",
-    "@wardex/intelligence": "^0.1.0",
+    "@wardexai/core": "^0.1.0",
+    "@wardexai/signer": "^0.1.0",
+    "@wardexai/intelligence": "^0.1.0",
     "vitest": "^3.0.0"
   }
 }

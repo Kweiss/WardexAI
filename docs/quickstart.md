@@ -8,13 +8,13 @@ Protect your first AI agent transaction in under 5 minutes.
 
 ```bash
 # Core SDK (required)
-npm install @wardex/core
+npm install @wardexai/core
 
 # Isolated signer + session keys (recommended)
-npm install @wardex/signer
+npm install @wardexai/signer
 
 # On-chain intelligence — address reputation, contract analysis (optional)
-npm install @wardex/intelligence
+npm install @wardexai/intelligence
 ```
 
 > **Using Claude Code?** Skip to the [MCP Server guide](./guides/mcp-server.md) or [Claude Skill guide](./guides/claude-skill.md) for a faster setup.
@@ -25,7 +25,7 @@ npm install @wardex/intelligence
 
 ```typescript
 // wardex-setup.ts
-import { createWardex, defaultPolicy } from '@wardex/core';
+import { createWardex, defaultPolicy } from '@wardexai/core';
 
 // Start with the default policy — it covers the 7 most common attack vectors
 const wardex = createWardex({
@@ -123,7 +123,7 @@ console.log(result.redactions);
 ### ethers.js v6
 
 ```typescript
-import { wrapEthersSigner } from '@wardex/core';
+import { wrapEthersSigner } from '@wardexai/core';
 
 // Wrap your existing signer — no other code changes needed
 const protectedSigner = wrapEthersSigner(existingSigner, wardex);
@@ -139,7 +139,7 @@ await protectedSigner.sendTransaction({
 ### viem
 
 ```typescript
-import { wrapViemWalletClient } from '@wardex/core';
+import { wrapViemWalletClient } from '@wardexai/core';
 
 const protectedClient = wrapViemWalletClient(existingWalletClient, wardex);
 

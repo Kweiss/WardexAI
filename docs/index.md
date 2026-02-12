@@ -50,12 +50,12 @@ Wardex fits into your stack however you need it:
 
 | Package | Description | npm |
 |---|---|---|
-| `@wardex/core` | Evaluation engine, policy, risk scoring, output filter | [![npm](https://img.shields.io/npm/v/@wardex/core)](https://npmjs.com/package/@wardex/core) |
-| `@wardex/signer` | Isolated signer, session keys, delegation manager | [![npm](https://img.shields.io/npm/v/@wardex/signer)](https://npmjs.com/package/@wardex/signer) |
-| `@wardex/intelligence` | On-chain analysis, address reputation, contract scanning | [![npm](https://img.shields.io/npm/v/@wardex/intelligence)](https://npmjs.com/package/@wardex/intelligence) |
-| `@wardex/mcp-server` | MCP server for Claude Code and agent frameworks | [![npm](https://img.shields.io/npm/v/@wardex/mcp-server)](https://npmjs.com/package/@wardex/mcp-server) |
-| `@wardex/claude-skill` | Claude Code skill with auto-activation hooks | [![npm](https://img.shields.io/npm/v/@wardex/claude-skill)](https://npmjs.com/package/@wardex/claude-skill) |
-| `@wardex/contracts` | Solidity: WardexValidationModule (ERC-4337) | [Source](../packages/contracts/) |
+| `@wardexai/core` | Evaluation engine, policy, risk scoring, output filter | [![npm](https://img.shields.io/npm/v/@wardexai/core)](https://npmjs.com/package/@wardexai/core) |
+| `@wardexai/signer` | Isolated signer, session keys, delegation manager | [![npm](https://img.shields.io/npm/v/@wardexai/signer)](https://npmjs.com/package/@wardexai/signer) |
+| `@wardexai/intelligence` | On-chain analysis, address reputation, contract scanning | [![npm](https://img.shields.io/npm/v/@wardexai/intelligence)](https://npmjs.com/package/@wardexai/intelligence) |
+| `@wardexai/mcp-server` | MCP server for Claude Code and agent frameworks | [![npm](https://img.shields.io/npm/v/@wardexai/mcp-server)](https://npmjs.com/package/@wardexai/mcp-server) |
+| `@wardexai/claude-skill` | Claude Code skill with auto-activation hooks | [![npm](https://img.shields.io/npm/v/@wardexai/claude-skill)](https://npmjs.com/package/@wardexai/claude-skill) |
+| `@wardexai/contracts` | Solidity: WardexValidationModule (ERC-4337) | [Source](../packages/contracts/) |
 
 ---
 
@@ -82,9 +82,9 @@ DOCS/
     contract-deployment.md          ← Deploy WardexValidationModule on-chain
 
   api-reference/
-    core.md                         ← @wardex/core API
-    signer.md                       ← @wardex/signer API
-    intelligence.md                 ← @wardex/intelligence API
+    core.md                         ← @wardexai/core API
+    signer.md                       ← @wardexai/signer API
+    intelligence.md                 ← @wardexai/intelligence API
     mcp-server.md                   ← MCP tool reference
     types.md                        ← TypeScript type reference
 
@@ -100,7 +100,7 @@ DOCS/
 ## Quick Example
 
 ```typescript
-import { createWardex, defaultPolicy } from '@wardex/core';
+import { createWardex, defaultPolicy } from '@wardexai/core';
 
 const wardex = createWardex({
   policy: defaultPolicy(),
