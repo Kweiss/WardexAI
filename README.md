@@ -6,7 +6,7 @@ Wardex is a TypeScript SDK that protects AI agents from the attacks humans spent
 
 Drop it in front of any ethers.js or viem wallet. Every transaction gets evaluated through a 9-stage middleware pipeline that produces a verdict: `approve`, `advise`, `block`, or `freeze`.
 
-[![Tests](https://img.shields.io/badge/tests-168%20passing-brightgreen)]()
+[![Tests](https://img.shields.io/badge/tests-200%20passing-brightgreen)]()
 [![Solidity Tests](https://img.shields.io/badge/solidity-16%20passing-brightgreen)]()
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)]()
@@ -35,6 +35,10 @@ For a conservative zero-config baseline across agents and users, copy the defaul
 cp defaults/wardex.env.default .env
 cp defaults/claude-settings.default.json .claude/settings.json
 ```
+
+`defaults/wardex.env.default` includes conservative HTTP settings:
+- `WARDEX_HTTP_HOST=127.0.0.1` (localhost bind)
+- optional `WARDEX_HTTP_AUTH_TOKEN` for Bearer auth on MCP endpoints
 
 ```typescript
 import { createWardex, defaultPolicy } from '@wardexai/core';
@@ -169,10 +173,19 @@ const protectedClient = wrapViemWalletClient(walletClient, wardex);
 For Claude Code or any MCP-compatible agent:
 
 ```bash
-npx @wardexai/mcp-server --stdio
+npx @wardexai/mcp-server
 ```
 
 Exposes 4 tools: `wardex_evaluate_transaction`, `wardex_check_address`, `wardex_get_status`, `wardex_filter_output`.
+
+For HTTP transport with conservative network defaults:
+
+```bash
+WARDEX_TRANSPORT=http \
+WARDEX_PORT=3100 \
+WARDEX_HTTP_HOST=127.0.0.1 \
+npx @wardexai/mcp-server
+```
 
 ### Claude Code Skill
 
@@ -213,6 +226,8 @@ const payload = dm.getSigningPayload(delegation.id);
 dm.setSignature(delegation.id, ownerSignature);
 ```
 
+`setSignature()` verifies the EIP-712 signature cryptographically and enforces signer == delegator.
+
 ---
 
 ## Development
@@ -235,7 +250,7 @@ npm run build
 ### Testing
 
 ```bash
-# Run all TypeScript tests (168 tests, 12 suites)
+# Run all TypeScript tests (200 tests currently)
 npx vitest run
 
 # Run Solidity tests (16 tests)
@@ -249,17 +264,21 @@ npm run lint
 
 | Suite | Tests | What It Covers |
 |---|---|---|
-| `prompt-injection` | 14 | 10+ injection patterns, fake system messages, cross-MCP, urgency, coherence |
-| `contract-analysis` | 10 | SELFDESTRUCT, DELEGATECALL, proxies, approve selectors |
-| `signer` | 10 | Key isolation, HMAC tokens, AES-256-GCM, health checks |
-| `behavioral` | 8 | Value anomaly, new contracts, frequency, sensitivity levels |
+| `prompt-injection` | 19 | Injection patterns, fake system messages, cross-MCP, urgency, coherence |
+| `contract-analysis` | 14 | SELFDESTRUCT, DELEGATECALL, proxies, honeypot patterns, false-positive guards |
+| `signer` | 15 | Key isolation, token binding, HMAC tokens, AES-256-GCM, auth handshake |
+| `behavioral` | 9 | Value anomaly, new contracts, frequency, sensitivity levels |
 | `social-engineering` | 8 | Urgency manipulation, authority impersonation, trust escalation |
 | `cross-mcp-manipulation` | 9 | Tool output injection, chained injection, seed phrase extraction |
-| `safety-drift` | 17 | Auto-freeze, daily volume limits, critical overrides, audit trail |
+| `safety-drift` | 20 | Auto-freeze, daily volume limits, critical overrides, unfreeze cooldown, audit trail |
 | `session-keys` | 25 | Boundaries, limits, infinite approvals, expiration, rotation, cleanup |
-| `delegation` | 47 | Enforcer mapping, EIP-712 signing, revocation, rotation, edge cases |
+| `delegation` | 49 | Enforcer mapping, EIP-712 signature verification, redemption encoding, rotation |
 | `delegation-integration` | 6 | Double-check with Wardex, scope rejection, rotation continuity |
 | `integration` | 8 | Full DeFi sessions, multi-vector attacks, output filtering |
+| `policy-guardrails` | 4 | Tier guardrails, middleware sandbox immutability and verdict-tamper protections |
+| `context-escalation` | 3 | Deterministic escalation threshold behavior and windowing |
+| `risk-tiering` | 3 | Tier boundary handling and trigger precedence |
+| `value-assessor` | 2 | Value parsing and fallback behavior |
 | `e2e-testnet` | 6 | Contract deployment, SDK+RPC intelligence, freeze/unfreeze |
 
 ---
@@ -309,7 +328,7 @@ wardex/
     mcp-server/     @wardexai/mcp-server  — MCP server (stdio + HTTP)
     claude-skill/   @wardexai/claude-skill — Claude Code skill + PreToolUse hooks
     contracts/      @wardexai/contracts   — Solidity: WardexValidationModule (ERC-4337)
-    test/           @wardexai/test        — 168 tests across 12 suites
+    test/           @wardexai/test        — scenario + integration validation suite
   docs/                                 — 25 documentation files
   examples/                             — Working code examples
 ```

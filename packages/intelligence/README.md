@@ -23,6 +23,9 @@ import { createIntelligenceProvider } from '@wardexai/intelligence';
 const intel = createIntelligenceProvider({
   rpcUrl: 'https://mainnet.infura.io/v3/YOUR_KEY',
   chainId: 1,
+  explorerApiKey: process.env.ETHERSCAN_API_KEY,
+  // Optional explicit explorer endpoint:
+  // explorerApiUrl: 'https://api.etherscan.io/api',
 });
 ```
 

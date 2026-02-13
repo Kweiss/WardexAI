@@ -7,6 +7,7 @@ Claude Code skill bundle for Wardex transaction security workflows.
 - Skill instructions (`SKILL.md`)
 - Command templates for common Wardex operations
 - Hook scripts/templates for pre-transaction evaluation
+- A conservative settings template for quick adoption
 
 ## Install
 
@@ -20,6 +21,13 @@ npm install @wardexai/claude-skill
 - `commands/`
 - `hooks/`
 - `settings-template.json`
+
+## Quick Usage
+
+```bash
+cp node_modules/@wardexai/claude-skill/settings-template.json .claude/settings.json
+claude mcp add wardex -e WARDEX_MODE=guardian npx @wardexai/mcp-server
+```
 
 ## Links
 

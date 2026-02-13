@@ -8,6 +8,8 @@ Signer and delegation utilities for Wardex.
 - Approval-token based signing flow
 - Session key management (ERC-7715)
 - MetaMask Delegation Framework integration
+- EIP-712 signature verification for delegations (`setSignature`)
+- Full function-encoded redemption calldata (`prepareRedemption`)
 
 ## Install
 
@@ -21,6 +23,10 @@ npm install @wardexai/signer
 import { DelegationManager } from '@wardexai/signer';
 
 const dm = new DelegationManager({ chainId: 1 });
+const delegation = dm.createDelegation(sessionConfig, ownerAddress);
+const payload = dm.getSigningPayload(delegation.id);
+// owner signs EIP-712 payload externally
+dm.setSignature(delegation.id, ownerSignature);
 ```
 
 ## Links
