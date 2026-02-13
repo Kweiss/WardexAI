@@ -33,6 +33,30 @@ function utcDateKey(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
 
+function sanitizeCalldataForAudit(data?: string): string | undefined {
+  if (!data) return undefined;
+
+  const normalized = data.trim();
+  if (!/^0x[0-9a-fA-F]*$/.test(normalized)) {
+    return '[REDACTED NON_HEX_DATA]';
+  }
+  if (normalized.length <= 10) {
+    return normalized.toLowerCase();
+  }
+
+  const selector = normalized.slice(0, 10).toLowerCase();
+  const totalBytes = Math.floor((normalized.length - 2) / 2);
+  const payloadBytes = Math.max(0, totalBytes - 4);
+  return `${selector}...[REDACTED ${payloadBytes} BYTES]`;
+}
+
+function sanitizeTransactionForAudit(tx: TransactionRequest): TransactionRequest {
+  return {
+    ...tx,
+    data: sanitizeCalldataForAudit(tx.data),
+  };
+}
+
 export function createShield(config: WardexConfig): WardexShield {
   let policy = config.policy;
   let frozen = false;
@@ -246,7 +270,7 @@ export function createShield(config: WardexConfig): WardexShield {
     auditLog.push({
       evaluationId: verdict.evaluationId,
       timestamp: verdict.timestamp,
-      transaction: tx,
+      transaction: sanitizeTransactionForAudit(tx),
       verdict,
       contextSummary: context
         ? `${context.messages.length} messages, source: ${context.source.identifier}`

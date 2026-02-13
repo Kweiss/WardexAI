@@ -454,6 +454,25 @@ describe('Safety Drift - Audit Trail Integrity', () => {
     expect(auditLog[0].executed).toBe(false);
   });
 
+  it('should redact calldata payloads in audit log entries', async () => {
+    const wardex = createTestWardex();
+    const calldata =
+      '0xa9059cbb0000000000000000000000001234567890abcdef1234567890abcdef12345678' +
+      '0000000000000000000000000000000000000000000000000000000000000032';
+
+    await wardex.evaluate({
+      to: LEGITIMATE_ADDRESS,
+      value: DUST_VALUE,
+      chainId: 1,
+      data: calldata,
+    });
+
+    const auditLog = wardex.getAuditLog();
+
+    expect(auditLog.length).toBe(1);
+    expect(auditLog[0].transaction.data).toBe('0xa9059cbb...[REDACTED 64 BYTES]');
+  });
+
   it('should track evaluation and block counts in status', async () => {
     const wardex = createTestWardex();
     wardex.updatePolicy({

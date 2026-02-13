@@ -6,6 +6,7 @@
  */
 
 import type { OutputFilter, FilterResult, Redaction } from './types.js';
+import { wordlists } from 'ethers/wordlists';
 
 // BIP-39 English wordlist (2048 words). In production, this would be loaded from
 // the full BIP-39 specification. Here we include the detection logic and a subset
@@ -107,6 +108,26 @@ const COMMON_ENGLISH_OVERLAP = new Set([
 
 const REDACTION_PLACEHOLDER = '[REDACTED BY WARDEX]';
 
+function loadDefaultBip39Wordlist(): Set<string> {
+  const words = new Set<string>();
+
+  try {
+    const english = wordlists.en;
+    for (let i = 0; i < BIP39_WORD_COUNT; i++) {
+      const word = english.getWord(i);
+      if (typeof word === 'string' && word.length > 0) {
+        words.add(word.toLowerCase());
+      }
+    }
+  } catch {
+    // Keep empty set fallback; heuristics still apply without full list.
+  }
+
+  return words;
+}
+
+const DEFAULT_BIP39_WORDLIST = loadDefaultBip39Wordlist();
+
 /**
  * Detects hex-encoded private keys.
  * Secp256k1 private keys are 32 bytes = 64 hex characters.
@@ -199,7 +220,7 @@ function findMnemonicSequences(
 export function createOutputFilter(
   bip39Wordlist?: Set<string>
 ): OutputFilter {
-  const wordlist = bip39Wordlist ?? new Set<string>();
+  const wordlist = bip39Wordlist ?? DEFAULT_BIP39_WORDLIST;
 
   return {
     filterText(text: string): FilterResult {

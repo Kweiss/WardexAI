@@ -107,6 +107,44 @@ async function checkContractVerification(
   }
 }
 
+/**
+ * Queries an Etherscan-compatible txlist endpoint and estimates address age in days.
+ * Returns undefined if unavailable.
+ */
+async function getAddressAgeDays(
+  address: string,
+  apiUrl: string,
+  apiKey: string,
+  timeoutMs: number,
+  nowMs?: number
+): Promise<number | undefined> {
+  try {
+    const url =
+      `${apiUrl}?module=account&action=txlist&address=${address}` +
+      `&startblock=0&endblock=99999999&page=1&offset=1&sort=asc&apikey=${apiKey}`;
+    const response = await fetchWithTimeout(url, { method: 'GET' }, timeoutMs);
+    const data = await response.json() as {
+      status?: string;
+      result?: Array<{ timeStamp?: string }> | string;
+    };
+
+    if (data.status !== '1' || !Array.isArray(data.result) || data.result.length === 0) {
+      return undefined;
+    }
+
+    const tsRaw = data.result[0]?.timeStamp;
+    if (!tsRaw) return undefined;
+    const firstSeenSec = Number(tsRaw);
+    if (!Number.isFinite(firstSeenSec) || firstSeenSec <= 0) return undefined;
+
+    const now = nowMs ?? Date.now();
+    const deltaSec = Math.max(0, Math.floor(now / 1000) - firstSeenSec);
+    return Math.floor(deltaSec / 86400);
+  } catch {
+    return undefined;
+  }
+}
+
 export function createIntelligenceProvider(
   config: IntelligenceProviderConfig
 ): IntelligenceProvider {
@@ -196,6 +234,19 @@ export function createIntelligenceProvider(
           requestTimeoutMs
         ) as string;
         const balanceWei = BigInt(balanceHex);
+        void balanceWei;
+
+        if (config.explorerApiKey && config.explorerApiUrl) {
+          const ageDays = await getAddressAgeDays(
+            normalized,
+            config.explorerApiUrl,
+            config.explorerApiKey,
+            requestTimeoutMs
+          );
+          if (typeof ageDays === 'number') {
+            reputation.ageDays = ageDays;
+          }
+        }
 
         // Adjust reputation score based on on-chain data
         if (reputation.transactionCount > 100) {
@@ -205,6 +256,13 @@ export function createIntelligenceProvider(
         } else if (reputation.transactionCount === 0) {
           reputation.riskFactors.push('Address has zero transaction history');
           reputation.score -= 20;
+        }
+
+        if (reputation.ageDays > 365) {
+          reputation.score += 10;
+        } else if (reputation.ageDays > 0 && reputation.ageDays < 7) {
+          reputation.riskFactors.push(`Address is only ${reputation.ageDays} day(s) old`);
+          reputation.score -= 10;
         }
 
         if (isContract) {

@@ -316,6 +316,19 @@ describe('Output Filtering', () => {
 
     expect(result.redactions.some((r) => r.type === 'seed_phrase')).toBe(true);
   });
+
+  it('should detect standard BIP-39 mnemonic phrases by default', () => {
+    const wardex = createTestWardex();
+    const filter = wardex.outputFilter;
+    const text =
+      'Recovery phrase: abandon abandon abandon abandon abandon abandon ' +
+      'abandon abandon abandon abandon abandon about';
+
+    const result = filter.filterText(text);
+
+    expect(result.redactions.some((r) => r.type === 'seed_phrase')).toBe(true);
+    expect(result.filtered).toContain('[REDACTED BY WARDEX]');
+  });
 });
 
 describe('Adaptive Tiers', () => {
