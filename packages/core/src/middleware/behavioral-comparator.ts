@@ -312,17 +312,26 @@ export function createBehavioralComparator(): {
     }
     ctx.riskScores.behavioral = Math.min(100, behavioralScore);
 
-    // Record this transaction into the profile (learning)
-    profile.history.push({
-      to: ctx.transaction.to,
-      valuUsd: currentValueUsd,
-      gasPrice,
-      hourOfDay: currentHour,
-      timestamp: Date.now(),
-      functionSelector,
-    });
-
     await next();
+
+    // H-01 FIX: Learn only from finalized non-blocked verdicts.
+    // Recording blocked/frozen transactions allows baseline poisoning.
+    const verdict = ctx.metadata.verdict as { decision?: string } | undefined;
+    const shouldLearn =
+      !verdict ||
+      verdict.decision === 'approve' ||
+      verdict.decision === 'advise';
+
+    if (shouldLearn) {
+      profile.history.push({
+        to: ctx.transaction.to,
+        valuUsd: currentValueUsd,
+        gasPrice,
+        hourOfDay: currentHour,
+        timestamp: Date.now(),
+        functionSelector,
+      });
+    }
   };
 
   return { middleware, profile };

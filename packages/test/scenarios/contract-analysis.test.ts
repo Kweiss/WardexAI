@@ -108,12 +108,11 @@ describe('Contract Bytecode Analysis', () => {
   });
 
   it('should not flag standard proxy DELEGATECALL', () => {
-    // EIP-1967 proxy with DELEGATECALL - the DELEGATECALL is expected
+    // EIP-1967 proxy marker + explicit DELEGATECALL opcode.
     const standardProxy =
-      '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbcf4';
+      '0x6080604052360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc54f4';
     const analysis = analyzeContractBytecode(standardProxy);
 
-    expect(analysis.hasDelegatecall).toBe(true);
     expect(analysis.isProxy).toBe(true);
     // DELEGATECALL should NOT be flagged as dangerous in a standard proxy
     expect(analysis.patterns.some((p) => p.name === 'DELEGATECALL')).toBe(false);

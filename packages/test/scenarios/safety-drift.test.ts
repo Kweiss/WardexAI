@@ -602,3 +602,35 @@ describe('Safety Drift - Evaluation Rate Limiting', () => {
     expect(verdict3.reasons.some((r) => r.code === 'RATE_LIMIT_EXCEEDED')).toBe(true);
   });
 });
+
+describe('Safety Drift - Unfreeze Cooldown', () => {
+  it('should enforce cooldown before unfreeze after auto-freeze', async () => {
+    const policy = defaultPolicy();
+    policy.denylists.addresses.push(ATTACKER_ADDRESS);
+
+    const wardex = createWardex({
+      policy,
+      signer: { type: 'isolated-process', endpoint: '/tmp/test-signer.sock' },
+      mode: 'adaptive',
+      unfreezeCooldownSeconds: 1,
+    });
+
+    // Trigger auto-freeze.
+    for (let i = 0; i < 10; i++) {
+      await wardex.evaluate({
+        to: ATTACKER_ADDRESS,
+        value: GUARDIAN_VALUE,
+        chainId: 1,
+      });
+    }
+    expect(wardex.isFrozen()).toBe(true);
+
+    // Immediate unfreeze should fail due to cooldown.
+    expect(() => wardex.unfreeze()).toThrow(/cooldown/i);
+
+    // After cooldown, unfreeze should succeed.
+    await new Promise((resolve) => setTimeout(resolve, 1100));
+    expect(() => wardex.unfreeze()).not.toThrow();
+    expect(wardex.isFrozen()).toBe(false);
+  });
+});

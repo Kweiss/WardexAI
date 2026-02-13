@@ -19,6 +19,7 @@
  */
 
 import * as crypto from 'node:crypto';
+import { computeAddress } from 'ethers';
 
 function utcDateKey(date: Date): string {
   return date.toISOString().slice(0, 10);
@@ -377,11 +378,10 @@ export class SessionManager {
 
   /**
    * Derives an Ethereum address from a private key.
-   * Simplified: in production, use ethers.js or viem for proper secp256k1.
-   * Here we use a deterministic hash to simulate address derivation.
+   * Uses secp256k1 public key derivation via ethers.
    */
   private deriveAddress(privateKey: string): string {
-    const hash = crypto.createHash('sha256').update(privateKey).digest('hex');
-    return '0x' + hash.slice(0, 40);
+    const normalized = privateKey.startsWith('0x') ? privateKey : `0x${privateKey}`;
+    return computeAddress(normalized).toLowerCase();
   }
 }

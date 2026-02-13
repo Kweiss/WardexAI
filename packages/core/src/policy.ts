@@ -119,8 +119,27 @@ export function mergePolicy(
   base: SecurityPolicy,
   overrides: Partial<SecurityPolicy>
 ): SecurityPolicy {
+  const mergedTiers = overrides.tiers ?? base.tiers;
+
+  if (overrides.tiers) {
+    if (mergedTiers.length === 0) {
+      throw new Error('Policy must include at least one security tier');
+    }
+
+    const hasBlockingTier = mergedTiers.some(
+      (tier) =>
+        tier.enforcement.mode === 'guardian' ||
+        tier.enforcement.mode === 'fortress'
+    );
+    if (!hasBlockingTier) {
+      throw new Error(
+        'Policy tiers must include at least one blocking tier (guardian or fortress)'
+      );
+    }
+  }
+
   return {
-    tiers: overrides.tiers ?? base.tiers,
+    tiers: mergedTiers,
     allowlists: {
       addresses: [
         ...base.allowlists.addresses,

@@ -116,7 +116,26 @@ export function createIntelligenceProvider(
   const reputationCache = new Map<string, { data: AddressReputation; expiry: number }>();
   const contractCache = new Map<string, { data: ContractAnalysis; expiry: number }>();
   const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+  const MAX_CACHE_ENTRIES = 5000;
   const requestTimeoutMs = config.requestTimeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS;
+
+  function pruneCache<T>(cache: Map<string, { data: T; expiry: number }>): void {
+    const now = Date.now();
+
+    // First remove expired entries.
+    for (const [key, entry] of cache.entries()) {
+      if (entry.expiry <= now) {
+        cache.delete(key);
+      }
+    }
+
+    // If still too large, drop oldest inserted entries.
+    while (cache.size > MAX_CACHE_ENTRIES) {
+      const oldestKey = cache.keys().next().value as string | undefined;
+      if (!oldestKey) break;
+      cache.delete(oldestKey);
+    }
+  }
 
   // Load initial denylist
   if (config.denylistPath) {
@@ -221,6 +240,7 @@ export function createIntelligenceProvider(
         data: reputation,
         expiry: Date.now() + CACHE_TTL_MS,
       });
+      pruneCache(reputationCache);
 
       return reputation;
     },
@@ -306,6 +326,7 @@ export function createIntelligenceProvider(
         data: analysis,
         expiry: Date.now() + CACHE_TTL_MS,
       });
+      pruneCache(contractCache);
 
       return analysis;
     },

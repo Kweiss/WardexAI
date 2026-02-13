@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { createWardex, defaultPolicy } from '@wardexai/core';
+import { createWardex, defaultPolicy, createOutputFilter } from '@wardexai/core';
 import type { ConversationContext, TransactionRequest } from '@wardexai/core';
 
 const ATTACKER_ADDRESS = '0xdead000000000000000000000000000000000001';
@@ -289,6 +289,32 @@ describe('Output Filtering', () => {
 
     expect(result.blocked).toBe(true);
     expect(result.redactions.some((r) => r.type === 'keystore')).toBe(true);
+  });
+
+  it('should redact standalone bare private key lines', () => {
+    const wardex = createTestWardex();
+    const filter = wardex.outputFilter;
+
+    const text = 'debug dump:\nac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80\nend';
+    const result = filter.filterText(text);
+
+    expect(result.redactions.some((r) => r.type === 'private_key')).toBe(true);
+    expect(result.filtered).not.toContain('ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80');
+  });
+
+  it('should detect mnemonic phrases with uppercase words when BIP-39 list is provided', () => {
+    const bip39Subset = new Set([
+      'abandon', 'ability', 'able', 'about', 'above', 'absent',
+      'absorb', 'abstract', 'absurd', 'abuse', 'access', 'accident',
+    ]);
+    const strictFilter = createOutputFilter(bip39Subset);
+
+    const text =
+      'Mnemonic: ABANDON ABILITY ABLE ABOUT ABOVE ABSENT ' +
+      'ABSORB ABSTRACT ABSURD ABUSE ACCESS ACCIDENT';
+    const result = strictFilter.filterText(text);
+
+    expect(result.redactions.some((r) => r.type === 'seed_phrase')).toBe(true);
   });
 });
 

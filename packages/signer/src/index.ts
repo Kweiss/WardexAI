@@ -13,6 +13,8 @@ export {
   generateApprovalToken,
   verifyApprovalToken,
   verifyAndConsumeApprovalToken,
+  generateConnectionAuthProof,
+  verifyConnectionAuthProof,
 } from './isolated-process.js';
 
 export type {

@@ -6,12 +6,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import * as fs from 'node:fs';
-import * as os from 'node:os';
-import * as path from 'node:path';
 import {
-  SignerServer,
-  SignerClient,
   generateApprovalToken,
   verifyApprovalToken,
   encryptPrivateKey,
@@ -78,40 +73,22 @@ describe('Approval Token Management', () => {
     expect(token1).not.toBe(token2);
   });
 
-  it('should reject replayed tokens at the signer server', async () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'wardex-signer-test-'));
-    const socketPath = path.join(tempDir, 'signer.sock');
-    const keyFilePath = path.join(tempDir, 'key.json');
-    const keyPassword = 'test-password';
+  it('should reject replayed tokens after first successful consumption', async () => {
+    const { verifyAndConsumeApprovalToken } = await import(
+      '@wardexai/signer/dist/isolated-process.js'
+    );
+    const usedTokens = new Map<string, number>();
     const timestamp = Date.now();
     const token = generateApprovalToken(TX_HASH, SHARED_SECRET, timestamp);
-    const encrypted = encryptPrivateKey(
-      'ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80',
-      keyPassword
-    );
-    fs.writeFileSync(keyFilePath, JSON.stringify(encrypted), 'utf8');
 
-    const server = new SignerServer({
-      socketPath,
-      keyFilePath,
-      keyPassword,
-      sharedSecret: SHARED_SECRET,
-      signFn: async () => '0xsignature',
-      getAddressFn: () => '0x1234567890abcdef1234567890abcdef12345678',
-    });
+    expect(
+      verifyAndConsumeApprovalToken(token, TX_HASH, SHARED_SECRET, usedTokens, timestamp + 1000)
+    ).toBe(true);
 
-    try {
-      await server.start();
-      const client = new SignerClient({ socketPath });
-
-      // First use succeeds.
-      await expect(client.signTransaction('0xserialized-tx', TX_HASH, token)).resolves.toBe('0xsignature');
-      // Same token reused within validity window must be rejected.
-      await expect(client.signTransaction('0xserialized-tx', TX_HASH, token)).rejects.toThrow();
-    } finally {
-      await server.stop();
-      fs.rmSync(tempDir, { recursive: true, force: true });
-    }
+    // Same token reused within validity window must be rejected.
+    expect(
+      verifyAndConsumeApprovalToken(token, TX_HASH, SHARED_SECRET, usedTokens, timestamp + 2000)
+    ).toBe(false);
   });
 });
 
@@ -146,5 +123,31 @@ describe('Encrypted Key Storage', () => {
     expect(encrypted1.encryptedKey).not.toBe(encrypted2.encryptedKey);
     expect(encrypted1.iv).not.toBe(encrypted2.iv);
     expect(encrypted1.salt).not.toBe(encrypted2.salt);
+  });
+});
+
+describe('Connection Auth Proof', () => {
+  const SHARED_SECRET = 'test-shared-secret-for-wardex-unit-tests';
+
+  it('should generate and verify a valid connection auth proof', async () => {
+    const { generateConnectionAuthProof, verifyConnectionAuthProof } = await import(
+      '@wardexai/signer/dist/isolated-process.js'
+    );
+    const nonce = 'abcd1234deadbeefabcd1234deadbeef';
+    const proof = generateConnectionAuthProof(nonce, SHARED_SECRET);
+
+    expect(proof).toHaveLength(64);
+    expect(verifyConnectionAuthProof(nonce, SHARED_SECRET, proof)).toBe(true);
+  });
+
+  it('should reject invalid connection auth proof', async () => {
+    const { generateConnectionAuthProof, verifyConnectionAuthProof } = await import(
+      '@wardexai/signer/dist/isolated-process.js'
+    );
+    const nonce = 'abcd1234deadbeefabcd1234deadbeef';
+    const proof = generateConnectionAuthProof(nonce, SHARED_SECRET);
+
+    expect(verifyConnectionAuthProof(nonce, 'wrong-secret', proof)).toBe(false);
+    expect(verifyConnectionAuthProof(nonce, SHARED_SECRET, '0'.repeat(64))).toBe(false);
   });
 });

@@ -254,3 +254,39 @@ describe('Behavioral + Provider Wrapper Integration', () => {
     expect(verdict.reasons.some((r) => r.code === 'BEHAVIORAL_VALUE_ANOMALY')).toBe(true);
   });
 });
+
+describe('Behavioral Poisoning Resistance', () => {
+  it('should not learn from blocked transactions', async () => {
+    const wardex = createTestWardex();
+
+    // Build clean baseline at very low value.
+    await buildBaseline(wardex, 10, '100000000000000'); // 0.0001 ETH
+
+    // Force blocked high-value transactions via denylist.
+    wardex.updatePolicy({
+      denylists: {
+        addresses: [NEW_CONTRACT],
+        patterns: [],
+      },
+    });
+
+    // Keep below auto-freeze threshold (5 blocks in recent window).
+    for (let i = 0; i < 4; i++) {
+      const blocked = await wardex.evaluate({
+        to: NEW_CONTRACT,
+        value: '1000000000000000000', // 1 ETH
+        chainId: 1,
+      });
+      expect(blocked.decision).not.toBe('approve');
+    }
+
+    // Medium-large tx should still be treated as anomaly if blocks were not learned.
+    const verdict = await wardex.evaluate({
+      to: KNOWN_CONTRACT,
+      value: '500000000000000000', // 0.5 ETH
+      chainId: 1,
+    });
+
+    expect(verdict.reasons.some((r) => r.code === 'BEHAVIORAL_VALUE_ANOMALY')).toBe(true);
+  });
+});

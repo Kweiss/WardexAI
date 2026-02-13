@@ -19,7 +19,7 @@
  */
 
 import * as crypto from 'node:crypto';
-import { AbiCoder } from 'ethers';
+import { AbiCoder, computeAddress } from 'ethers';
 import type { SessionKeyConfig } from './session-manager.js';
 import type { SessionValidationResult } from './session-manager.js';
 import {
@@ -523,7 +523,7 @@ export class DelegationManager {
     dailyVolumeWei: bigint;
     dailyResetDate: string;
   }): void {
-    const today = new Date().toDateString();
+    const today = utcDateKey(new Date());
     if (today !== state.dailyResetDate) {
       state.dailyVolumeWei = 0n;
       state.dailyResetDate = today;
@@ -565,7 +565,10 @@ export class DelegationManager {
   }
 
   private deriveAddress(privateKey: string): string {
-    const hash = crypto.createHash('sha256').update(privateKey).digest('hex');
-    return '0x' + hash.slice(0, 40);
+    const normalized = privateKey.startsWith('0x') ? privateKey : `0x${privateKey}`;
+    return computeAddress(normalized).toLowerCase();
   }
+}
+function utcDateKey(date: Date): string {
+  return date.toISOString().slice(0, 10);
 }

@@ -20,6 +20,8 @@ export interface WardexConfig {
   mode: EnforcementMode;
   /** Max evaluate() calls per second. Set <= 0 to disable. Default: 100 */
   evaluationRateLimitPerSecond?: number;
+  /** Minimum cooldown after auto-freeze before unfreeze is allowed (seconds, default 900) */
+  unfreezeCooldownSeconds?: number;
   /** ERC-8004 agent identity (optional, for on-chain trust signal) */
   agentIdentity?: AgentIdentityConfig;
   /**

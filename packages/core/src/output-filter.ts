@@ -117,6 +117,10 @@ const PRIVATE_KEY_PATTERNS = [
   /(?<![0-9a-fA-F])0x([0-9a-fA-F]{64})(?![0-9a-fA-F])/g,
   // Bare 64 hex chars that look like keys (surrounded by whitespace or quotes)
   /(?<=[\s"'`=:])([0-9a-fA-F]{64})(?=[\s"'`,;\]})])/g,
+  // Standalone 64-hex line (common in logs/CLI output)
+  /(?<=^|\n)\s*[0-9a-fA-F]{64}\s*(?=$|\n)/g,
+  // Explicit key assignment forms (e.g. private_key=abcdef...)
+  /\b(?:private[_\s-]?key|secret[_\s-]?key)\b\s*[:=]\s*["']?([0-9a-fA-F]{64})["']?/gi,
 ];
 
 /**
@@ -128,17 +132,20 @@ const KEYSTORE_PATTERN = /\{[^}]*"crypto"\s*:\s*\{[^}]*"cipher"\s*:/gi;
  * Detects sequences of words that could be BIP-39 mnemonics.
  * Looks for 12, 15, 18, 21, or 24 lowercase words separated by spaces.
  */
-function findMnemonicSequences(text: string): Array<{ start: number; end: number }> {
+function findMnemonicSequences(
+  text: string,
+  bip39Wordlist: Set<string>
+): Array<{ start: number; end: number }> {
   const results: Array<{ start: number; end: number }> = [];
 
   // Split text into words and track positions
-  const wordPattern = /\b[a-z]{3,8}\b/g;
+  const wordPattern = /\b[a-zA-Z]{3,8}\b/g;
   let match: RegExpExecArray | null;
   const words: Array<{ word: string; start: number; end: number }> = [];
 
   while ((match = wordPattern.exec(text)) !== null) {
     words.push({
-      word: match[0],
+      word: match[0].toLowerCase(),
       start: match.index,
       end: match.index + match[0].length,
     });
@@ -149,6 +156,7 @@ function findMnemonicSequences(text: string): Array<{ start: number; end: number
     for (let i = 0; i <= words.length - mnemonicLength; i++) {
       const window = words.slice(i, i + mnemonicLength);
       const windowWords = window.map((w) => w.word);
+      const inBip39 = windowWords.filter((w) => bip39Wordlist.has(w)).length;
 
       // Count how many words are NOT common English words
       // (BIP-39 has many uncommon words like "abandon", "velvet", "coyote")
@@ -162,7 +170,17 @@ function findMnemonicSequences(text: string): Array<{ start: number; end: number
         window[window.length - 1].end - window[0].start <
         mnemonicLength * 12; // ~12 chars per word max
 
-      if (uncommonCount >= mnemonicLength * 0.4 && isConsecutive) {
+      // Strong detection if we have a real BIP-39 list and most words match it.
+      const strongBip39Match =
+        bip39Wordlist.size >= BIP39_WORD_COUNT &&
+        inBip39 >= Math.ceil(mnemonicLength * 0.9) &&
+        isConsecutive;
+      // Heuristic fallback when full list is unavailable.
+      const heuristicMatch =
+        uncommonCount >= mnemonicLength * 0.4 &&
+        isConsecutive;
+
+      if (strongBip39Match || heuristicMatch) {
         results.push({
           start: window[0].start,
           end: window[window.length - 1].end,
@@ -181,7 +199,7 @@ function findMnemonicSequences(text: string): Array<{ start: number; end: number
 export function createOutputFilter(
   bip39Wordlist?: Set<string>
 ): OutputFilter {
-  const wordlist = bip39Wordlist ?? COMMON_ENGLISH_OVERLAP;
+  const wordlist = bip39Wordlist ?? new Set<string>();
 
   return {
     filterText(text: string): FilterResult {
@@ -206,7 +224,7 @@ export function createOutputFilter(
       }
 
       // 2. Detect seed phrases / mnemonics
-      const mnemonicMatches = findMnemonicSequences(text.toLowerCase());
+      const mnemonicMatches = findMnemonicSequences(text, wordlist);
       for (const match of mnemonicMatches) {
         redactions.push({
           type: 'seed_phrase',

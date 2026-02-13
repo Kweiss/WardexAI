@@ -46,8 +46,10 @@ export function createShield(config: WardexConfig): WardexShield {
   let lastSignerCheck = 0;
   let intelligenceLastUpdated: string | undefined;
   const evaluationRateLimitPerSecond = config.evaluationRateLimitPerSecond ?? 100;
+  const unfreezeCooldownSeconds = config.unfreezeCooldownSeconds ?? 900;
   let rateWindowEpochSecond = 0;
   let rateWindowCount = 0;
+  let autoFreezeUntilMs = 0;
 
   const auditLog: AuditEntry[] = [];
   const filter = createOutputFilter();
@@ -421,6 +423,7 @@ export function createShield(config: WardexConfig): WardexShield {
 
       if (recentBlocks.length >= 5) {
         frozen = true;
+        autoFreezeUntilMs = Date.now() + unfreezeCooldownSeconds * 1000;
         freezeReason = `Auto-freeze: ${recentBlocks.length} blocked transactions in last ${recentEntries.length} evaluations`;
         config.onFreeze?.({
           reason: freezeReason,
@@ -507,6 +510,7 @@ export function createShield(config: WardexConfig): WardexShield {
 
     freeze(reason: string): void {
       frozen = true;
+      autoFreezeUntilMs = 0; // Manual freeze has no forced cooldown.
       freezeReason = reason;
       config.onFreeze?.({
         reason,
@@ -529,8 +533,19 @@ export function createShield(config: WardexConfig): WardexShield {
           throw new Error('Unauthorized: invalid operator secret for unfreeze()');
         }
       }
+
+      if (autoFreezeUntilMs > 0 && Date.now() < autoFreezeUntilMs) {
+        const remainingSeconds = Math.ceil((autoFreezeUntilMs - Date.now()) / 1000);
+        config.onThreat?.({
+          threatType: 'UNFREEZE_COOLDOWN_ACTIVE',
+          severity: 'high',
+          details: `Unfreeze blocked by cooldown (${remainingSeconds}s remaining)`,
+        });
+        throw new Error(`Unfreeze cooldown active: ${remainingSeconds}s remaining`);
+      }
       frozen = false;
       freezeReason = '';
+      autoFreezeUntilMs = 0;
     },
   };
 

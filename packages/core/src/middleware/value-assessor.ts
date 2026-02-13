@@ -25,6 +25,31 @@ export interface ValueAssessorConfig {
   ethPriceUsd?: number;
   /** Token prices by contract address (lowercase). Map of address → USD price per token (18 decimals). */
   tokenPricesUsd?: Map<string, number>;
+  /** Token decimals by contract address (lowercase). Defaults to 18 when not specified. */
+  tokenDecimals?: Map<string, number>;
+}
+
+const USD_MICROS_SCALE = 1_000_000n;
+const MAX_ESTIMATED_USD = 1_000_000_000_000; // $1T safety cap for conversion
+
+function toUsd(
+  amount: bigint,
+  decimals: number,
+  unitPriceUsd: number
+): number {
+  if (amount <= 0n || unitPriceUsd <= 0) return 0;
+  if (!Number.isFinite(unitPriceUsd)) return 0;
+
+  const safeDecimals = Number.isInteger(decimals) && decimals >= 0 && decimals <= 36
+    ? decimals
+    : 18;
+  const priceMicros = BigInt(Math.max(0, Math.round(unitPriceUsd * Number(USD_MICROS_SCALE))));
+  const scale = 10n ** BigInt(safeDecimals);
+  const usdMicros = (amount * priceMicros) / scale;
+
+  const maxUsdMicros = BigInt(MAX_ESTIMATED_USD) * USD_MICROS_SCALE;
+  if (usdMicros >= maxUsdMicros) return MAX_ESTIMATED_USD;
+  return Number(usdMicros) / Number(USD_MICROS_SCALE);
 }
 
 /**
@@ -34,6 +59,7 @@ export interface ValueAssessorConfig {
 export function createValueAssessor(config?: ValueAssessorConfig): Middleware {
   const ethPrice = config?.ethPriceUsd ?? DEFAULT_ETH_PRICE_USD;
   const tokenPrices = config?.tokenPricesUsd ?? new Map<string, number>();
+  const tokenDecimals = config?.tokenDecimals ?? new Map<string, number>();
 
   return async (ctx, next) => {
     let estimatedValueUsd = 0;
@@ -41,9 +67,7 @@ export function createValueAssessor(config?: ValueAssessorConfig): Middleware {
     // 1. Calculate ETH value
     const weiValue = BigInt(ctx.transaction.value ?? '0');
     if (weiValue > 0n) {
-      // Convert wei to ETH (1 ETH = 10^18 wei)
-      const ethValue = Number(weiValue) / 1e18;
-      estimatedValueUsd += ethValue * ethPrice;
+      estimatedValueUsd += toUsd(weiValue, 18, ethPrice);
     }
 
     // 2. Calculate token value for approvals and transfers
@@ -62,8 +86,8 @@ export function createValueAssessor(config?: ValueAssessorConfig): Middleware {
               estimatedValueUsd = Math.max(estimatedValueUsd, 100_000);
             } else if (target && tokenPrices.has(target)) {
               const tokenPrice = tokenPrices.get(target)!;
-              const tokenValue = Number(amountBig) / 1e18;
-              estimatedValueUsd += tokenValue * tokenPrice;
+              const decimals = tokenDecimals.get(target) ?? 18;
+              estimatedValueUsd += toUsd(amountBig, decimals, tokenPrice);
             }
           } catch {
             // If we can't parse the amount, be conservative
@@ -78,8 +102,8 @@ export function createValueAssessor(config?: ValueAssessorConfig): Middleware {
           try {
             const amountBig = BigInt(amount);
             const tokenPrice = tokenPrices.get(target)!;
-            const tokenValue = Number(amountBig) / 1e18;
-            estimatedValueUsd += tokenValue * tokenPrice;
+            const decimals = tokenDecimals.get(target) ?? 18;
+            estimatedValueUsd += toUsd(amountBig, decimals, tokenPrice);
           } catch {
             // Can't parse - use conservative estimate
             estimatedValueUsd = Math.max(estimatedValueUsd, 100);

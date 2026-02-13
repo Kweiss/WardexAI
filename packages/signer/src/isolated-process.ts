@@ -44,11 +44,22 @@ interface HealthCheckRequest {
   type: 'health_check';
 }
 
+interface AuthResponseRequest {
+  type: 'auth_response';
+  hmac: string;
+}
+
 type SignerRequest =
   | SignRequest
   | SignMessageRequest
   | GetAddressRequest
-  | HealthCheckRequest;
+  | HealthCheckRequest
+  | AuthResponseRequest;
+
+interface AuthChallengeMessage {
+  type: 'auth_challenge';
+  nonce: string;
+}
 
 interface SignerResponse {
   success: boolean;
@@ -158,6 +169,40 @@ export function verifyAndConsumeApprovalToken(
   return true;
 }
 
+/**
+ * Creates a connection-auth proof for signer IPC handshake.
+ * HMAC(sharedSecret, nonce) binds the client to possession of the secret.
+ */
+export function generateConnectionAuthProof(
+  nonce: string,
+  sharedSecret: string
+): string {
+  const hmac = crypto.createHmac('sha256', sharedSecret);
+  hmac.update('wardex-ipc-auth-v1:');
+  hmac.update(nonce);
+  return hmac.digest('hex');
+}
+
+/**
+ * Verifies a connection-auth proof with timing-safe compare.
+ */
+export function verifyConnectionAuthProof(
+  nonce: string,
+  sharedSecret: string,
+  proof: string
+): boolean {
+  if (!/^[0-9a-f]{64}$/i.test(proof)) return false;
+  const expected = generateConnectionAuthProof(nonce, sharedSecret);
+  try {
+    return crypto.timingSafeEqual(
+      Buffer.from(expected, 'hex'),
+      Buffer.from(proof, 'hex')
+    );
+  } catch {
+    return false;
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Encrypted Key Storage
 // ---------------------------------------------------------------------------
@@ -231,6 +276,12 @@ export interface SignerServerConfig {
   keyPassword: string;
   /** Shared secret for approval token verification */
   sharedSecret: string;
+  /** Require challenge-response auth for every socket connection (default: true) */
+  requireClientAuth?: boolean;
+  /** Max simultaneous client connections (default: 100) */
+  maxConnections?: number;
+  /** Max new connections per second (default: 200) */
+  connectionRateLimitPerSecond?: number;
   /** Sign function - pluggable to support different key types */
   signFn: (data: string, privateKey: string) => Promise<string>;
   /** Get address function */
@@ -247,6 +298,9 @@ export class SignerServer {
    */
   private privateKeyBuf: Buffer = Buffer.alloc(0);
   private usedApprovalTokens: Map<string, number> = new Map();
+  private activeConnections = 0;
+  private connectionWindowEpochSecond = 0;
+  private connectionWindowCount = 0;
   private config: SignerServerConfig;
 
   constructor(config: SignerServerConfig) {
@@ -270,6 +324,24 @@ export class SignerServer {
 
     // Start Unix socket server
     this.server = net.createServer((connection) => {
+      const maxConnections = this.config.maxConnections ?? 100;
+      const rateLimitPerSecond = this.config.connectionRateLimitPerSecond ?? 200;
+
+      if (this.activeConnections >= maxConnections || this.isConnectionRateLimited(rateLimitPerSecond)) {
+        const errorResponse: SignerResponse = {
+          success: false,
+          error: 'Connection limit exceeded',
+        };
+        connection.write(JSON.stringify(errorResponse) + '\n');
+        connection.destroy();
+        return;
+      }
+
+      this.activeConnections++;
+      connection.on('close', () => {
+        this.activeConnections = Math.max(0, this.activeConnections - 1);
+      });
+
       this.handleConnection(connection);
     });
 
@@ -311,6 +383,14 @@ export class SignerServer {
 
   private handleConnection(connection: net.Socket): void {
     let buffer = '';
+    const requireClientAuth = this.config.requireClientAuth ?? true;
+    let authenticated = !requireClientAuth;
+    const nonce = crypto.randomBytes(16).toString('hex');
+
+    if (requireClientAuth) {
+      const challenge: AuthChallengeMessage = { type: 'auth_challenge', nonce };
+      connection.write(JSON.stringify(challenge) + '\n');
+    }
 
     connection.on('data', async (data) => {
       buffer += data.toString();
@@ -322,7 +402,31 @@ export class SignerServer {
       for (const line of lines) {
         if (!line.trim()) continue;
         try {
-          const request: SignerRequest = JSON.parse(line);
+          const request = JSON.parse(line) as SignerRequest;
+
+          if (!authenticated) {
+            if (
+              request.type !== 'auth_response' ||
+              !verifyConnectionAuthProof(nonce, this.config.sharedSecret, request.hmac)
+            ) {
+              const errorResponse: SignerResponse = {
+                success: false,
+                error: 'Authentication failed',
+              };
+              connection.write(JSON.stringify(errorResponse) + '\n');
+              connection.destroy();
+              return;
+            }
+
+            authenticated = true;
+            const authOkResponse: SignerResponse = {
+              success: true,
+              data: 'authenticated',
+            };
+            connection.write(JSON.stringify(authOkResponse) + '\n');
+            continue;
+          }
+
           const response = await this.handleRequest(request);
           connection.write(JSON.stringify(response) + '\n');
         } catch (err) {
@@ -334,6 +438,17 @@ export class SignerServer {
         }
       }
     });
+  }
+
+  private isConnectionRateLimited(rateLimitPerSecond: number): boolean {
+    if (rateLimitPerSecond <= 0) return false;
+    const nowSecond = Math.floor(Date.now() / 1000);
+    if (nowSecond !== this.connectionWindowEpochSecond) {
+      this.connectionWindowEpochSecond = nowSecond;
+      this.connectionWindowCount = 0;
+    }
+    this.connectionWindowCount++;
+    return this.connectionWindowCount > rateLimitPerSecond;
   }
 
   private async handleRequest(request: SignerRequest): Promise<SignerResponse> {
@@ -419,6 +534,8 @@ export class SignerServer {
 export interface SignerClientConfig {
   /** Unix socket path to connect to */
   socketPath: string;
+  /** Shared secret used for connection challenge-response auth */
+  sharedSecret?: string;
   /** Timeout for requests in ms */
   timeout?: number;
 }
@@ -440,6 +557,9 @@ export class SignerClient {
       const client = net.createConnection(this.config.socketPath);
       let buffer = '';
       let resolved = false;
+      let authenticated = false;
+      let requestSent = false;
+      let gotAuthChallenge = false;
 
       const timer = setTimeout(() => {
         if (!resolved) {
@@ -450,7 +570,16 @@ export class SignerClient {
       }, timeout);
 
       client.on('connect', () => {
-        client.write(JSON.stringify(request) + '\n');
+        // Backward-compatibility fallback: old signer servers may not
+        // emit an auth challenge. If no challenge is seen quickly, send
+        // the request directly.
+        setTimeout(() => {
+          if (!resolved && !requestSent && !gotAuthChallenge) {
+            requestSent = true;
+            authenticated = true;
+            client.write(JSON.stringify(request) + '\n');
+          }
+        }, 50);
       });
 
       client.on('data', (data) => {
@@ -460,7 +589,48 @@ export class SignerClient {
         for (const line of lines) {
           if (!line.trim()) continue;
           try {
-            const response: SignerResponse = JSON.parse(line);
+            const message = JSON.parse(line) as SignerResponse | AuthChallengeMessage;
+
+            if (
+              typeof message === 'object' &&
+              message !== null &&
+              'type' in message &&
+              message.type === 'auth_challenge'
+            ) {
+              gotAuthChallenge = true;
+              if (!this.config.sharedSecret) {
+                if (!resolved) {
+                  resolved = true;
+                  clearTimeout(timer);
+                  client.destroy();
+                  reject(new Error('Signer auth challenge received but sharedSecret is not configured'));
+                }
+                return;
+              }
+
+              const proof = generateConnectionAuthProof(
+                message.nonce,
+                this.config.sharedSecret
+              );
+              const authRequest: AuthResponseRequest = {
+                type: 'auth_response',
+                hmac: proof,
+              };
+              client.write(JSON.stringify(authRequest) + '\n');
+              continue;
+            }
+
+            const response = message as SignerResponse;
+
+            if (!authenticated && response.success && response.data === 'authenticated') {
+              authenticated = true;
+              if (!requestSent) {
+                requestSent = true;
+                client.write(JSON.stringify(request) + '\n');
+              }
+              continue;
+            }
+
             if (!resolved) {
               resolved = true;
               clearTimeout(timer);
