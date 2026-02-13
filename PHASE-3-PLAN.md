@@ -27,14 +27,14 @@ Ship production-ready on-chain enforcement and account-abstraction integration:
 ## In Scope (Phase 3)
 
 ### 1) ERC-4337 On-Chain Enforcement Completion
-- [ ] Verify `validateUserOp` compatibility against target account implementations (Safe 4337 module path, Kernel path, and one generic 4337 account)
-- [ ] Add explicit test vectors for unsupported callData/value extraction patterns to avoid false confidence
-- [ ] Add event-level assertions and failure-reason mapping for operator observability
-- [ ] Freeze ABI + storage layout review and produce deployment artifact manifest
+- [~] Verify `validateUserOp` compatibility against target account implementations (Safe 4337 module path, Kernel path, and one generic 4337 account)
+- [x] Add explicit test vectors for unsupported callData/value extraction patterns to avoid false confidence
+- [x] Add event-level assertions and failure-reason mapping for operator observability
+- [~] Freeze ABI + storage layout review and produce deployment artifact manifest
 
 ### 2) ERC-7715 Session Key Hardening
-- [ ] Add cross-check tests that prove session constraints and delegation caveats are equivalent for core limits
-- [ ] Add replay/expiry edge-case tests for rotation + revocation windows
+- [x] Add cross-check tests that prove session constraints and delegation caveats are equivalent for core limits
+- [x] Add replay/expiry edge-case tests for rotation + revocation windows
 - [ ] Define conservative production defaults for session boundaries (duration/value/allowed targets)
 - [ ] Document operational key-rotation and emergency-revocation playbook
 
@@ -67,8 +67,8 @@ Ship production-ready on-chain enforcement and account-abstraction integration:
 - [ ] Evaluator key-management + incident runbook finalized
 
 ### P1 (should complete in Phase 3)
-- [ ] Session-vs-delegation parity tests for limits and approval restrictions
-- [ ] Edge-case tests: revocation/rotation race windows and expiry boundaries
+- [x] Session-vs-delegation parity tests for limits and approval restrictions
+- [x] Edge-case tests: revocation/rotation race windows and expiry boundaries
 - [ ] Operator dashboards/checks documented (minimum required alerts + thresholds)
 
 ### P2 (nice to have in Phase 3 if time allows)
@@ -104,3 +104,14 @@ Ship production-ready on-chain enforcement and account-abstraction integration:
 2. Run Base Sepolia deployment from `packages/contracts/script/Deploy.s.sol`.
 3. Record deployment artifact manifest in-repo and wire it into E2E config.
 4. Execute and document testnet go/no-go review before Base mainnet.
+
+## Recent Progress
+- Added unsupported callData selector/value-extraction test vectors in `packages/contracts/test/WardexValidationModule.t.sol`.
+- Added event assertion coverage for approve/block outcomes and reason mapping in `packages/contracts/test/WardexValidationModule.t.sol`.
+- Added deployment artifact manifest scaffold at `packages/contracts/deployments/manifest.template.json`.
+- Added session-vs-delegation parity test suite for core limits and approval restrictions in `packages/test/scenarios/session-delegation-parity.test.ts`.
+- Added rotation/revocation/expiry edge-case checks in `packages/test/scenarios/session-delegation-parity.test.ts`.
+- Added explicit compatibility matrix vectors for generic/Safe/Kernel selector patterns in `packages/contracts/test/WardexValidationModule.t.sol`.
+- Added matrix tracker document at `packages/contracts/compatibility/erc4337-matrix.md`.
+- Added machine-readable compatibility config template at `packages/contracts/compatibility/erc4337-matrix.config.template.json`.
+- Added execution runbook at `packages/contracts/compatibility/erc4337-matrix-runbook.md`.

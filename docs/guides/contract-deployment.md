@@ -271,6 +271,23 @@ The `WardexValidationModule` follows the ERC-4337 module pattern and is compatib
 
 ---
 
+## Phase 3 Compatibility Matrix
+
+For production readiness, execute the ERC-4337 compatibility matrix across real account implementations:
+
+- Matrix tracker: `packages/contracts/compatibility/erc4337-matrix.md`
+- Config template: `packages/contracts/compatibility/erc4337-matrix.config.template.json`
+- Execution runbook: `packages/contracts/compatibility/erc4337-matrix-runbook.md`
+
+This matrix verifies `validateUserOp` behavior for:
+- Generic `execute(address,uint256,bytes)` paths
+- Safe 4337 module paths
+- Kernel account paths
+
+and records caller/auth/value-extraction outcomes for go/no-go decisions.
+
+---
+
 ## What's Next?
 
 - **[Delegation Framework](./delegation-framework.md)** -- Add MetaMask delegation for fine-grained on-chain enforcement

@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "network": {
+    "name": "base-sepolia",
+    "chainId": 84532,
+    "rpcUrlEnv": "BASE_SEPOLIA_RPC",
+    "explorerBaseUrl": "https://sepolia.basescan.org"
+  },
+  "module": {
+    "address": "0x0000000000000000000000000000000000000000",
+    "deployedCommitSha": "",
+    "manifestPath": "packages/contracts/deployments/manifest.template.json"
+  },
+  "evaluator": {
+    "address": "0x0000000000000000000000000000000000000000",
+    "pkEnv": "EVALUATOR_PK"
+  },
+  "entryPoint": {
+    "address": "0x0000000000000000000000000000000000000000"
+  },
+  "implementations": [
+    {
+      "id": "generic-4337",
+      "accountAddress": "0x0000000000000000000000000000000000000000",
+      "executeSelector": "0xb61d27f6",
+      "executeSignature": "execute(address,uint256,bytes)",
+      "expectedValueExtraction": "supported"
+    },
+    {
+      "id": "safe-4337",
+      "accountAddress": "0x0000000000000000000000000000000000000000",
+      "executeSelector": "0x6a761202",
+      "executeSignature": "execTransaction(address,uint256,bytes,uint8,uint256,uint256,uint256,address,address,bytes)",
+      "expectedValueExtraction": "currently_skipped"
+    },
+    {
+      "id": "kernel-4337",
+      "accountAddress": "0x0000000000000000000000000000000000000000",
+      "executeSelector": "0x1cff79cd",
+      "executeSignature": "execute((address,uint256,bytes)[])",
+      "expectedValueExtraction": "currently_skipped"
+    }
+  ],
+  "limits": {
+    "ethMaxPerTxWei": "1000000000000000000",
+    "ethMaxPerDayWei": "10000000000000000000"
+  },
+  "vectors": {
+    "belowLimitValueWei": "100000000000000000",
+    "aboveLimitValueWei": "2000000000000000000"
+  }
+}

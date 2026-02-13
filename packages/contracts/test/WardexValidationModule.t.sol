@@ -18,6 +18,9 @@ contract WardexValidationModuleTest is Test {
     address account;
     address entryPoint;
 
+    event TransactionApproved(address indexed account, bytes32 indexed userOpHash);
+    event TransactionBlocked(address indexed account, bytes32 indexed userOpHash, string reason);
+
     function setUp() public {
         module = new WardexValidationModule();
 
@@ -28,6 +31,28 @@ contract WardexValidationModuleTest is Test {
         // "account" is the smart account that calls into the module
         account = address(0xBEEF);
         entryPoint = address(0x4337);
+    }
+
+    function _signUserOp(bytes32 userOpHash, uint256 signingKey) internal returns (bytes memory) {
+        bytes32 prefixedHash = keccak256(
+            abi.encodePacked("\x19Ethereum Signed Message:\n32", userOpHash)
+        );
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(signingKey, prefixedHash);
+        return abi.encodePacked(r, s, v);
+    }
+
+    function _buildUserOp(bytes memory signature, bytes memory callData) internal view returns (PackedUserOperation memory) {
+        return PackedUserOperation({
+            sender: account,
+            nonce: 0,
+            initCode: "",
+            callData: callData,
+            accountGasLimits: bytes32(0),
+            preVerificationGas: 0,
+            gasFees: bytes32(0),
+            paymasterAndData: "",
+            signature: signature
+        });
     }
 
     // -----------------------------------------------------------------------
@@ -345,5 +370,174 @@ contract WardexValidationModuleTest is Test {
         vm.prank(entryPoint);
         uint256 result = module.validateUserOp(userOp, userOpHash, 0);
         assertEq(result, 0, "Configured EntryPoint should be allowed");
+    }
+
+    function test_validateUserOp_emitsBlockedEventForUnauthorizedCaller() public {
+        vm.prank(account);
+        module.initialize(evaluator, 1 ether, 10 ether);
+
+        bytes32 userOpHash = keccak256("blocked-unauthorized");
+        bytes memory signature = _signUserOp(userOpHash, evaluatorPk);
+        PackedUserOperation memory userOp = _buildUserOp(signature, "");
+
+        vm.expectEmit(true, true, false, true, address(module));
+        emit TransactionBlocked(account, userOpHash, "Unauthorized validation caller");
+
+        vm.prank(address(0xCAFE));
+        uint256 result = module.validateUserOp(userOp, userOpHash, 0);
+        assertEq(result, 1);
+    }
+
+    function test_validateUserOp_emitsBlockedEventForInvalidApproval() public {
+        vm.prank(account);
+        module.initialize(evaluator, 1 ether, 10 ether);
+
+        bytes32 userOpHash = keccak256("blocked-invalid-approval");
+        bytes memory wrongSignature = _signUserOp(userOpHash, 0xBAD);
+        PackedUserOperation memory userOp = _buildUserOp(wrongSignature, "");
+
+        vm.expectEmit(true, true, false, true, address(module));
+        emit TransactionBlocked(account, userOpHash, "Invalid Wardex approval");
+
+        vm.prank(account);
+        uint256 result = module.validateUserOp(userOp, userOpHash, 0);
+        assertEq(result, 1);
+    }
+
+    function test_validateUserOp_emitsApprovedEvent() public {
+        vm.prank(account);
+        module.initialize(evaluator, 1 ether, 10 ether);
+
+        bytes32 userOpHash = keccak256("approved-userop");
+        bytes memory signature = _signUserOp(userOpHash, evaluatorPk);
+        PackedUserOperation memory userOp = _buildUserOp(signature, "");
+
+        vm.expectEmit(true, true, false, false, address(module));
+        emit TransactionApproved(account, userOpHash);
+
+        vm.prank(account);
+        uint256 result = module.validateUserOp(userOp, userOpHash, 0);
+        assertEq(result, 0);
+    }
+
+    function test_validateUserOp_blocksExecuteValueAboveLimit() public {
+        vm.prank(account);
+        module.initialize(evaluator, 1 ether, 10 ether);
+
+        bytes memory executeCallData = abi.encodeWithSelector(
+            bytes4(0xb61d27f6), // execute(address,uint256,bytes)
+            address(0x1111),
+            2 ether, // exceeds 1 ether maxPerTx
+            bytes("")
+        );
+
+        bytes32 userOpHash = keccak256("execute-value-over-limit");
+        bytes memory signature = _signUserOp(userOpHash, evaluatorPk);
+        PackedUserOperation memory userOp = _buildUserOp(signature, executeCallData);
+
+        vm.expectEmit(true, true, false, true, address(module));
+        emit TransactionBlocked(account, userOpHash, "Spending limit exceeded");
+
+        vm.prank(account);
+        uint256 result = module.validateUserOp(userOp, userOpHash, 0);
+        assertEq(result, 1, "execute(...) value above limit should be blocked");
+    }
+
+    function test_validateUserOp_unsupportedSelectorSkipsValueExtraction() public {
+        vm.prank(account);
+        module.initialize(evaluator, 1 ether, 10 ether);
+
+        // Unsupported selector: same argument shape but not execute(address,uint256,bytes).
+        bytes memory unsupportedCallData = abi.encodeWithSelector(
+            bytes4(0xdeadbeef),
+            address(0x1111),
+            20 ether, // would exceed limits if extracted
+            bytes("")
+        );
+
+        bytes32 userOpHash = keccak256("unsupported-selector");
+        bytes memory signature = _signUserOp(userOpHash, evaluatorPk);
+        PackedUserOperation memory userOp = _buildUserOp(signature, unsupportedCallData);
+
+        vm.prank(account);
+        uint256 result = module.validateUserOp(userOp, userOpHash, 0);
+        assertEq(result, 0, "unsupported selector should skip value extraction and pass");
+
+        (, , uint256 spentToday, ) = module.spendingLimits(account, address(0));
+        assertEq(spentToday, 0, "no spending should be recorded when value extraction is skipped");
+    }
+
+    function test_compatMatrix_genericExecutePattern_supportedAndEnforced() public {
+        vm.prank(account);
+        module.initialize(evaluator, 1 ether, 10 ether);
+
+        bytes memory genericExecuteCallData = abi.encodeWithSelector(
+            bytes4(0xb61d27f6), // execute(address,uint256,bytes)
+            address(0x1111),
+            2 ether, // above per-tx limit
+            bytes("")
+        );
+
+        bytes32 userOpHash = keccak256("compat-generic-execute");
+        bytes memory signature = _signUserOp(userOpHash, evaluatorPk);
+        PackedUserOperation memory userOp = _buildUserOp(signature, genericExecuteCallData);
+
+        vm.prank(account);
+        uint256 result = module.validateUserOp(userOp, userOpHash, 0);
+        assertEq(result, 1, "generic execute selector should be parsed and limit-enforced");
+    }
+
+    function test_compatMatrix_safeExecTransactionPattern_currentlyNotParsed() public {
+        vm.prank(account);
+        module.initialize(evaluator, 1 ether, 10 ether);
+
+        // Safe-style selector (execTransaction(...)); payload includes a large value,
+        // but module's current extractor only handles execute(address,uint256,bytes).
+        bytes memory safeExecCallData = abi.encodeWithSelector(
+            bytes4(0x6a761202), // execTransaction(address,uint256,bytes,uint8,uint256,uint256,uint256,address,address,bytes)
+            address(0x2222),
+            5 ether,
+            bytes(""),
+            uint8(0),
+            uint256(0),
+            uint256(0),
+            uint256(0),
+            address(0),
+            address(0),
+            bytes("")
+        );
+
+        bytes32 userOpHash = keccak256("compat-safe-exectx");
+        bytes memory signature = _signUserOp(userOpHash, evaluatorPk);
+        PackedUserOperation memory userOp = _buildUserOp(signature, safeExecCallData);
+
+        vm.prank(account);
+        uint256 result = module.validateUserOp(userOp, userOpHash, 0);
+        assertEq(result, 0, "safe execTransaction pattern is currently skipped by extractor");
+
+        (, , uint256 spentToday, ) = module.spendingLimits(account, address(0));
+        assertEq(spentToday, 0, "no spending recorded for unsupported safe selector");
+    }
+
+    function test_compatMatrix_kernelExecutePattern_currentlyNotParsed() public {
+        vm.prank(account);
+        module.initialize(evaluator, 1 ether, 10 ether);
+
+        // Kernel-like execute selector vector (placeholder ABI shape for compatibility gating).
+        bytes memory kernelExecuteCallData = abi.encodeWithSelector(
+            bytes4(0x1cff79cd), // execute((address,uint256,bytes)[])
+            abi.encode(address(0x3333), uint256(4 ether), bytes(""))
+        );
+
+        bytes32 userOpHash = keccak256("compat-kernel-execute");
+        bytes memory signature = _signUserOp(userOpHash, evaluatorPk);
+        PackedUserOperation memory userOp = _buildUserOp(signature, kernelExecuteCallData);
+
+        vm.prank(account);
+        uint256 result = module.validateUserOp(userOp, userOpHash, 0);
+        assertEq(result, 0, "kernel-style execute vector is currently skipped by extractor");
+
+        (, , uint256 spentToday, ) = module.spendingLimits(account, address(0));
+        assertEq(spentToday, 0, "no spending recorded for unsupported kernel selector");
     }
 }
