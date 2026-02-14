@@ -60,3 +60,8 @@ export type {
   CaveatTerm,
   EnforcerAddresses,
 } from './enforcer-mapping.js';
+
+export {
+  PRODUCTION_DEFAULTS,
+  createSessionWithDefaults,
+} from './session-defaults.js';

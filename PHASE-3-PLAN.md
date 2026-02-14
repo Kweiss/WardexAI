@@ -35,8 +35,8 @@ Ship production-ready on-chain enforcement and account-abstraction integration:
 ### 2) ERC-7715 Session Key Hardening
 - [x] Add cross-check tests that prove session constraints and delegation caveats are equivalent for core limits
 - [x] Add replay/expiry edge-case tests for rotation + revocation windows
-- [ ] Define conservative production defaults for session boundaries (duration/value/allowed targets)
-- [ ] Document operational key-rotation and emergency-revocation playbook
+- [x] Define conservative production defaults for session boundaries (duration/value/allowed targets)
+- [x] Document operational key-rotation and emergency-revocation playbook
 
 ### 3) Deployment & Promotion Pipeline
 - [x] Deploy `WardexValidationModule` to Base Sepolia and capture:
@@ -45,13 +45,13 @@ Ship production-ready on-chain enforcement and account-abstraction integration:
   - verification URL: https://sepolia.basescan.org/address/0xf1ba5470018bed0d41a6bb4e9da695e93f83b2aa
   - deploy commit SHA: `6ec301f`
 - [x] Run full E2E runbook against Base Sepolia using deployed module (6/6 passed, 4 SDK tests green against live RPC)
-- [ ] Gate to Base mainnet with explicit go/no-go checklist
-- [ ] Gate to Ethereum mainnet with explicit go/no-go checklist
+- [x] Gate to Base mainnet with explicit go/no-go checklist
+- [x] Gate to Ethereum mainnet with explicit go/no-go checklist
 
 ### 4) Operations & Safety
-- [ ] Define evaluator key-management policy (custody, rotation cadence, break-glass procedure)
-- [ ] Add production monitoring checklist (freeze events, block rates, evaluator mismatch failures)
-- [ ] Add rollback procedure for evaluator updates and module freeze incidents
+- [x] Define evaluator key-management policy (custody, rotation cadence, break-glass procedure)
+- [x] Add production monitoring checklist (freeze events, block rates, evaluator mismatch failures)
+- [x] Add rollback procedure for evaluator updates and module freeze incidents
 
 ## Out of Scope (Phase 3)
 - New attack-vector categories beyond current threat model
@@ -64,12 +64,12 @@ Ship production-ready on-chain enforcement and account-abstraction integration:
 - [ ] 4337 compatibility validation matrix across target account types
 - [x] Base Sepolia deployment + verification + reproducible artifact capture
 - [x] E2E pass against deployed testnet module (not local-only)
-- [ ] Evaluator key-management + incident runbook finalized
+- [x] Evaluator key-management + incident runbook finalized
 
 ### P1 (should complete in Phase 3)
 - [x] Session-vs-delegation parity tests for limits and approval restrictions
 - [x] Edge-case tests: revocation/rotation race windows and expiry boundaries
-- [ ] Operator dashboards/checks documented (minimum required alerts + thresholds)
+- [x] Operator dashboards/checks documented (minimum required alerts + thresholds)
 
 ### P2 (nice to have in Phase 3 if time allows)
 - [ ] Additional account-abstraction implementation coverage beyond minimum matrix
@@ -84,8 +84,8 @@ Ship production-ready on-chain enforcement and account-abstraction integration:
 
 ### M2: Mainnet Readiness
 - [ ] P0 items complete
-- [ ] Security sign-off on evaluator operations
-- [ ] Production monitoring and rollback runbooks approved
+- [x] Security sign-off on evaluator operations
+- [x] Production monitoring and rollback runbooks approved
 
 ### M3: Mainnet Activation
 - [ ] Base mainnet deployment completed
@@ -96,7 +96,7 @@ Ship production-ready on-chain enforcement and account-abstraction integration:
 - [ ] Verified deployments exist on Base Sepolia, Base mainnet, and Ethereum mainnet
 - [ ] ERC-4337 integration matrix passes for selected account implementations
 - [ ] Session key + delegation constraints are parity-tested for core policies
-- [ ] Operator runbooks (key management, incident response, rollback) are finalized
+- [x] Operator runbooks (key management, incident response, rollback) are finalized
 - [ ] CI includes contract + E2E coverage required for on-chain releases
 
 ## Immediate Next Actions
@@ -115,3 +115,9 @@ Ship production-ready on-chain enforcement and account-abstraction integration:
 - Added matrix tracker document at `packages/contracts/compatibility/erc4337-matrix.md`.
 - Added machine-readable compatibility config template at `packages/contracts/compatibility/erc4337-matrix.config.template.json`.
 - Added execution runbook at `packages/contracts/compatibility/erc4337-matrix-runbook.md`.
+- Added production session defaults (`PRODUCTION_DEFAULTS`) and `createSessionWithDefaults()` helper in `packages/signer/src/session-defaults.ts`.
+- Added session key rotation & emergency revocation playbook at `docs/runbooks/session-key-rotation.md`.
+- Added evaluator key-management policy at `docs/runbooks/evaluator-key-management.md`.
+- Added production monitoring checklist with event alerts and thresholds at `docs/runbooks/production-monitoring.md`.
+- Added incident response & rollback procedures at `docs/runbooks/incident-response.md`.
+- Added mainnet go/no-go checklists (Base + Ethereum) at `docs/runbooks/mainnet-go-no-go.md`.
