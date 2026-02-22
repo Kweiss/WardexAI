@@ -364,27 +364,97 @@ contract WardexValidationModule is IWardexValidationModule {
     }
 
     /**
-     * @notice Extracts the ETH value from a standard execute(address,uint256,bytes) callData.
-     * @dev The execute function selector is 0xb61d27f6. The value is the second
-     *      parameter (bytes 36-68 of the callData). If the callData doesn't match
-     *      this pattern, returns 0 (no value extracted, spending check skipped).
-     *      This covers the standard ERC-4337 smart account execute pattern used by
-     *      Safe, Kernel, Biconomy, and similar implementations.
+     * @notice Extracts the ETH value from supported execute callData patterns.
+     * @dev Supported selectors:
+     *      - Generic execute(address,uint256,bytes):       0xb61d27f6
+     *      - Safe execTransaction(address,uint256,...):     0x6a761202
+     *      - Kernel execute((address,uint256,bytes)[]):     0x1cff79cd
+     *
+     *      Generic and Safe both have the value as the 2nd ABI parameter at
+     *      callData offset 36. Kernel uses a dynamic array of tuples; we sum
+     *      all value fields via _extractKernelBatchValue().
+     *
+     *      If the callData doesn't match any supported pattern, returns 0
+     *      (no value extracted, spending check skipped — defense-in-depth:
+     *      the off-chain SDK still enforces limits).
      */
     function _extractExecuteValue(bytes calldata callData) internal pure returns (uint256) {
         // Minimum length: 4 (selector) + 32 (address) + 32 (value) = 68 bytes
         if (callData.length < 68) return 0;
 
-        // Check for execute(address,uint256,bytes) selector: 0xb61d27f6
         bytes4 selector = bytes4(callData[:4]);
-        if (selector != bytes4(0xb61d27f6)) return 0;
 
-        // Value is at offset 36 (4 + 32 bytes for the address parameter)
-        uint256 value;
-        assembly {
-            value := calldataload(add(callData.offset, 36))
+        // Generic: execute(address,uint256,bytes) — 0xb61d27f6
+        // Safe:    execTransaction(address,uint256,...) — 0x6a761202
+        // Both have value as 2nd param at callData offset 36
+        if (selector == bytes4(0xb61d27f6) || selector == bytes4(0x6a761202)) {
+            uint256 value;
+            assembly {
+                value := calldataload(add(callData.offset, 36))
+            }
+            return value;
         }
-        return value;
+
+        // Kernel: execute((address,uint256,bytes)[]) — 0x1cff79cd
+        // ABI-encoded dynamic array of (address,uint256,bytes) tuples.
+        // Sum all value fields for aggregate spending check.
+        if (selector == bytes4(0x1cff79cd)) {
+            return _extractKernelBatchValue(callData);
+        }
+
+        return 0;
+    }
+
+    /**
+     * @notice Extracts summed ETH value from a Kernel-style batch execute callData.
+     * @dev Layout after 4-byte selector:
+     *      - 32 bytes: offset pointer to dynamic array
+     *      - At that offset: 32 bytes array length, then N tuple offset pointers
+     *      - Each tuple: (address padded to 32, uint256 value, bytes offset/data)
+     *      Iterations capped at 8 to bound gas and prevent DoS.
+     */
+    function _extractKernelBatchValue(bytes calldata callData) internal pure returns (uint256) {
+        // Minimum: 4 (selector) + 32 (offset) + 32 (length) = 68 bytes
+        if (callData.length < 68) return 0;
+
+        // Read the offset pointer to the dynamic array
+        uint256 arrayOffset;
+        assembly {
+            arrayOffset := calldataload(add(callData.offset, 4))
+        }
+        uint256 arrayStart = 4 + arrayOffset;
+        if (callData.length < arrayStart + 32) return 0;
+
+        // Read array length
+        uint256 arrayLen;
+        assembly {
+            arrayLen := calldataload(add(callData.offset, arrayStart))
+        }
+
+        // Cap iterations to prevent DoS (max 8 batch items)
+        if (arrayLen > 8) arrayLen = 8;
+
+        uint256 total = 0;
+        uint256 offsetsStart = arrayStart + 32;
+
+        for (uint256 i = 0; i < arrayLen; i++) {
+            // Each element has an offset pointer
+            if (callData.length < offsetsStart + (i + 1) * 32) break;
+            uint256 elemOffset;
+            assembly {
+                elemOffset := calldataload(add(callData.offset, add(offsetsStart, mul(i, 32))))
+            }
+
+            uint256 elemStart = arrayStart + 32 + elemOffset;
+            // value is 2nd field in tuple: elemStart + 32 (skip address)
+            if (callData.length < elemStart + 64) break;
+            uint256 val;
+            assembly {
+                val := calldataload(add(callData.offset, add(elemStart, 32)))
+            }
+            total += val;
+        }
+        return total;
     }
 
     // -----------------------------------------------------------------------

@@ -487,12 +487,12 @@ contract WardexValidationModuleTest is Test {
         assertEq(result, 1, "generic execute selector should be parsed and limit-enforced");
     }
 
-    function test_compatMatrix_safeExecTransactionPattern_currentlyNotParsed() public {
+    function test_compatMatrix_safeExecTransactionPattern_enforced() public {
         vm.prank(account);
         module.initialize(evaluator, 1 ether, 10 ether);
 
-        // Safe-style selector (execTransaction(...)); payload includes a large value,
-        // but module's current extractor only handles execute(address,uint256,bytes).
+        // Safe-style selector (execTransaction(...)); payload includes 5 ETH,
+        // which exceeds the 1 ETH per-tx limit → should be blocked.
         bytes memory safeExecCallData = abi.encodeWithSelector(
             bytes4(0x6a761202), // execTransaction(address,uint256,bytes,uint8,uint256,uint256,uint256,address,address,bytes)
             address(0x2222),
@@ -511,33 +511,204 @@ contract WardexValidationModuleTest is Test {
         bytes memory signature = _signUserOp(userOpHash, evaluatorPk);
         PackedUserOperation memory userOp = _buildUserOp(signature, safeExecCallData);
 
+        vm.expectEmit(true, true, false, true, address(module));
+        emit TransactionBlocked(account, userOpHash, "Spending limit exceeded");
+
         vm.prank(account);
         uint256 result = module.validateUserOp(userOp, userOpHash, 0);
-        assertEq(result, 0, "safe execTransaction pattern is currently skipped by extractor");
+        assertEq(result, 1, "safe execTransaction with value above limit should be blocked");
 
         (, , uint256 spentToday, ) = module.spendingLimits(account, address(0));
-        assertEq(spentToday, 0, "no spending recorded for unsupported safe selector");
+        assertEq(spentToday, 0, "no spending recorded when blocked");
     }
 
-    function test_compatMatrix_kernelExecutePattern_currentlyNotParsed() public {
+    function test_compatMatrix_kernelExecutePattern_enforced() public {
         vm.prank(account);
         module.initialize(evaluator, 1 ether, 10 ether);
 
-        // Kernel-like execute selector vector (placeholder ABI shape for compatibility gating).
-        bytes memory kernelExecuteCallData = abi.encodeWithSelector(
-            bytes4(0x1cff79cd), // execute((address,uint256,bytes)[])
-            abi.encode(address(0x3333), uint256(4 ether), bytes(""))
-        );
+        // Kernel-style batch: single item with 4 ETH (exceeds 1 ETH per-tx limit)
+        bytes memory kernelExecuteCallData = _buildKernelBatchCallData(_singleKernelItem(address(0x3333), 4 ether));
 
         bytes32 userOpHash = keccak256("compat-kernel-execute");
         bytes memory signature = _signUserOp(userOpHash, evaluatorPk);
         PackedUserOperation memory userOp = _buildUserOp(signature, kernelExecuteCallData);
 
+        vm.expectEmit(true, true, false, true, address(module));
+        emit TransactionBlocked(account, userOpHash, "Spending limit exceeded");
+
         vm.prank(account);
         uint256 result = module.validateUserOp(userOp, userOpHash, 0);
-        assertEq(result, 0, "kernel-style execute vector is currently skipped by extractor");
+        assertEq(result, 1, "kernel batch with value above limit should be blocked");
 
         (, , uint256 spentToday, ) = module.spendingLimits(account, address(0));
-        assertEq(spentToday, 0, "no spending recorded for unsupported kernel selector");
+        assertEq(spentToday, 0, "no spending recorded when blocked");
+    }
+
+    // -----------------------------------------------------------------------
+    // Compatibility Matrix — Additional Tests
+    // -----------------------------------------------------------------------
+
+    function test_compatMatrix_safeExecTransaction_belowLimitPasses() public {
+        vm.prank(account);
+        module.initialize(evaluator, 1 ether, 10 ether);
+
+        bytes memory safeExecCallData = abi.encodeWithSelector(
+            bytes4(0x6a761202),
+            address(0x2222),
+            0.5 ether, // below 1 ETH per-tx limit
+            bytes(""),
+            uint8(0),
+            uint256(0),
+            uint256(0),
+            uint256(0),
+            address(0),
+            address(0),
+            bytes("")
+        );
+
+        bytes32 userOpHash = keccak256("compat-safe-below-limit");
+        bytes memory signature = _signUserOp(userOpHash, evaluatorPk);
+        PackedUserOperation memory userOp = _buildUserOp(signature, safeExecCallData);
+
+        vm.prank(account);
+        uint256 result = module.validateUserOp(userOp, userOpHash, 0);
+        assertEq(result, 0, "safe execTransaction below limit should pass");
+
+        (, , uint256 spentToday, ) = module.spendingLimits(account, address(0));
+        assertEq(spentToday, 0.5 ether, "spending should be recorded for safe selector");
+    }
+
+    function test_compatMatrix_kernelBatchExecute_belowLimitPasses() public {
+        vm.prank(account);
+        module.initialize(evaluator, 1 ether, 10 ether);
+
+        // Two items summing to 0.5 ETH (below limit)
+        bytes[] memory items = new bytes[](2);
+        items[0] = abi.encode(address(0x3333), uint256(0.2 ether), bytes(""));
+        items[1] = abi.encode(address(0x4444), uint256(0.3 ether), bytes(""));
+        bytes memory kernelCallData = _buildKernelBatchCallDataMulti(items);
+
+        bytes32 userOpHash = keccak256("compat-kernel-below-limit");
+        bytes memory signature = _signUserOp(userOpHash, evaluatorPk);
+        PackedUserOperation memory userOp = _buildUserOp(signature, kernelCallData);
+
+        vm.prank(account);
+        uint256 result = module.validateUserOp(userOp, userOpHash, 0);
+        assertEq(result, 0, "kernel batch below limit should pass");
+
+        (, , uint256 spentToday, ) = module.spendingLimits(account, address(0));
+        assertEq(spentToday, 0.5 ether, "spending should be recorded for kernel batch");
+    }
+
+    function test_compatMatrix_kernelBatchExecute_sumExceedsLimit() public {
+        vm.prank(account);
+        module.initialize(evaluator, 1 ether, 10 ether);
+
+        // Three items at 0.4 ETH each = 1.2 ETH total (exceeds 1 ETH per-tx)
+        bytes[] memory items = new bytes[](3);
+        items[0] = abi.encode(address(0x3333), uint256(0.4 ether), bytes(""));
+        items[1] = abi.encode(address(0x4444), uint256(0.4 ether), bytes(""));
+        items[2] = abi.encode(address(0x5555), uint256(0.4 ether), bytes(""));
+        bytes memory kernelCallData = _buildKernelBatchCallDataMulti(items);
+
+        bytes32 userOpHash = keccak256("compat-kernel-sum-exceeds");
+        bytes memory signature = _signUserOp(userOpHash, evaluatorPk);
+        PackedUserOperation memory userOp = _buildUserOp(signature, kernelCallData);
+
+        vm.expectEmit(true, true, false, true, address(module));
+        emit TransactionBlocked(account, userOpHash, "Spending limit exceeded");
+
+        vm.prank(account);
+        uint256 result = module.validateUserOp(userOp, userOpHash, 0);
+        assertEq(result, 1, "kernel batch with summed value above limit should be blocked");
+
+        (, , uint256 spentToday, ) = module.spendingLimits(account, address(0));
+        assertEq(spentToday, 0, "no spending recorded when blocked");
+    }
+
+    function test_compatMatrix_kernelBatchExecute_emptyArray() public {
+        vm.prank(account);
+        module.initialize(evaluator, 1 ether, 10 ether);
+
+        // Empty batch: 0 items → 0 value
+        bytes[] memory items = new bytes[](0);
+        bytes memory kernelCallData = _buildKernelBatchCallDataMulti(items);
+
+        bytes32 userOpHash = keccak256("compat-kernel-empty");
+        bytes memory signature = _signUserOp(userOpHash, evaluatorPk);
+        PackedUserOperation memory userOp = _buildUserOp(signature, kernelCallData);
+
+        vm.prank(account);
+        uint256 result = module.validateUserOp(userOp, userOpHash, 0);
+        assertEq(result, 0, "kernel empty batch should pass with zero value");
+
+        (, , uint256 spentToday, ) = module.spendingLimits(account, address(0));
+        assertEq(spentToday, 0, "zero spending for empty batch");
+    }
+
+    // -----------------------------------------------------------------------
+    // Kernel Batch CallData Helpers
+    // -----------------------------------------------------------------------
+
+    /// @dev Build Kernel batch callData with a single (address,uint256,bytes) item.
+    function _singleKernelItem(address to, uint256 value) internal pure returns (bytes[] memory) {
+        bytes[] memory items = new bytes[](1);
+        items[0] = abi.encode(to, value, bytes(""));
+        return items;
+    }
+
+    /// @dev Build Kernel-style callData: selector + ABI-encoded (address,uint256,bytes)[].
+    ///      Manually constructs the dynamic array encoding to match what the contract parser expects.
+    function _buildKernelBatchCallData(bytes[] memory items) internal pure returns (bytes memory) {
+        return _buildKernelBatchCallDataMulti(items);
+    }
+
+    function _buildKernelBatchCallDataMulti(bytes[] memory items) internal pure returns (bytes memory) {
+        // Each tuple (address, uint256, bytes) is a dynamic type due to the bytes field.
+        // ABI encoding of a dynamic array of dynamic tuples:
+        //   - 32 bytes: offset to array data (always 0x20)
+        //   - 32 bytes: array length
+        //   - N * 32 bytes: offsets to each tuple (relative to array data start)
+        //   - N tuples: each encoded as (address padded, uint256, offset to bytes, bytes length, bytes data)
+
+        uint256 n = items.length;
+
+        // Build tuple encodings first to know offsets
+        bytes[] memory encodedTuples = new bytes[](n);
+        for (uint256 i = 0; i < n; i++) {
+            (address to, uint256 value, bytes memory data) = abi.decode(items[i], (address, uint256, bytes));
+            // Tuple encoding: address(32) + uint256(32) + offset to bytes(32) + bytes length(32) + bytes data padded
+            // The bytes offset is always 0x60 (3 * 32) since it comes after address, value, and the offset field itself
+            uint256 dataWords = (data.length + 31) / 32;
+            encodedTuples[i] = abi.encodePacked(
+                bytes32(uint256(uint160(to))),   // address padded to 32 bytes
+                bytes32(value),                   // uint256 value
+                bytes32(uint256(0x60)),           // offset to bytes data (3 * 32 = 96 = 0x60)
+                bytes32(data.length),             // bytes length
+                data,                             // bytes data
+                new bytes(dataWords * 32 - data.length) // padding
+            );
+        }
+
+        // Calculate tuple offsets (relative to start of tuple offset array)
+        // Actually, offsets are relative to the start of the array content (after the length word)
+        uint256 offsetsSize = n * 32;
+        uint256[] memory tupleOffsets = new uint256[](n);
+        uint256 runningOffset = offsetsSize; // tuples start after all offset pointers
+        for (uint256 i = 0; i < n; i++) {
+            tupleOffsets[i] = runningOffset;
+            runningOffset += encodedTuples[i].length;
+        }
+
+        // Assemble: selector + offset to array (0x20) + array length + offsets + tuples
+        bytes memory result = abi.encodePacked(bytes4(0x1cff79cd), bytes32(uint256(0x20)), bytes32(n));
+        for (uint256 i = 0; i < n; i++) {
+            result = abi.encodePacked(result, bytes32(tupleOffsets[i]));
+        }
+        for (uint256 i = 0; i < n; i++) {
+            result = abi.encodePacked(result, encodedTuples[i]);
+        }
+
+        return result;
     }
 }

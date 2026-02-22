@@ -31,14 +31,14 @@
       "accountAddress": "0x0000000000000000000000000000000000000000",
       "executeSelector": "0x6a761202",
       "executeSignature": "execTransaction(address,uint256,bytes,uint8,uint256,uint256,uint256,address,address,bytes)",
-      "expectedValueExtraction": "currently_skipped"
+      "expectedValueExtraction": "supported"
     },
     {
       "id": "kernel-4337",
       "accountAddress": "0x0000000000000000000000000000000000000000",
       "executeSelector": "0x1cff79cd",
       "executeSignature": "execute((address,uint256,bytes)[])",
-      "expectedValueExtraction": "currently_skipped"
+      "expectedValueExtraction": "supported"
     }
   ],
   "limits": {

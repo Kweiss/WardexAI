@@ -6,8 +6,8 @@ Wardex is a TypeScript SDK that protects AI agents from the attacks humans spent
 
 Drop it in front of any ethers.js or viem wallet. Every transaction gets evaluated through a 9-stage middleware pipeline that produces a verdict: `approve`, `advise`, `block`, or `freeze`.
 
-[![Tests](https://img.shields.io/badge/tests-200%20passing-brightgreen)]()
-[![Solidity Tests](https://img.shields.io/badge/solidity-16%20passing-brightgreen)]()
+[![Tests](https://img.shields.io/badge/tests-212%20passing-brightgreen)]()
+[![Solidity Tests](https://img.shields.io/badge/solidity-30%20passing-brightgreen)]()
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)]()
 
@@ -250,10 +250,10 @@ npm run build
 ### Testing
 
 ```bash
-# Run all TypeScript tests (200 tests currently)
+# Run all TypeScript tests (212 tests currently)
 npx vitest run
 
-# Run Solidity tests (16 tests)
+# Run Solidity tests (30 tests)
 cd packages/contracts && forge test
 
 # Lint
